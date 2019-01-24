@@ -1,22 +1,26 @@
 # TODO:
-# 2. Material density
-# 2. Memory map correction
-# 3. CRC control
 # 4. beckup memory region
 # 5. try to read from beckup, if CRC fail
-# 6. On/Off debug mode
+# 9. color in HEX ????
+# 10. error control (color and material out of range
+# DONE:
+# 1. Material density
+# 2. Memory map correction
+# 3. CRC control
 # 7. gr2mm, mm2gr, gr2mony functions
 # 8. balance in % function
-# 9. color in HEX ????
+# 6. On/Off debug mode
 #*******************************************************************************
 #***************************INCLIDE*********************************************
 #*******************************************************************************
 from PlasticData import spool,material,colorStr
-import MFRC522
+from MFRC522 import MFRC522
 import RPi.GPIO as GPIO
 import signal
 import time
 import binascii
+import math
+from crc8 import crc
 #*******************************************************************************
 #**************************CONSTANT*********************************************
 #*******************************************************************************
@@ -24,10 +28,10 @@ keyA = [0xFF,0xFF,0xFF,0xFF,0xFF,0xFF]
 #*******************************************************************************
 #*************************MEMORY MAP********************************************
 #*******************************************************************************
-#   |-15-14-13-|-12-11-|--10--9--|--8-|-7--|---6-|5---|---4-|--3----2--|---1--0---|
-# 4 | RESERVED | price | diametr | balance |   weight |      color     | material |
-# 5 |                           V E N D O R     N A M E                           |
-# 6 |         R E S E R V E D         |bedMaxTemp|bedMinTemp|extMaxTemp|extMinTemp|
+#   |--15----14--|--13----12--|-11---10-|-9-----8-|--7----6--|--5----4--|--3----2--|--1----0--|
+# 4 |  RESERVED  |   density  |  price  | diametr |  balance |  weight  |   color  | material |
+# 5 |                                 V E N D O R     N A M E                                 |
+# 6 | CRC8 |       R E S E R V E D                |bedMaxTemp|bedMinTemp|extMaxTemp|extMinTemp|
 #*******************************************************************************
 # block 4
 materialAdr   = 0	# 2 bytes
@@ -44,6 +48,7 @@ extMinTempAdr = 0   # 2 bytes
 extMaxTempAdr = 2   # 2 bytes
 bedMinTempAdr = 4   # 2 bytes
 bedMaxTempAdr = 6   # 2 bytes
+heshAdr       = 15  # 1 byte
 # sum 29 bytes = 2 blocks
 #*******************************************************************************
 #*****************************VAR***********************************************
@@ -62,10 +67,13 @@ def end_read(signal,frame):
 #*******************************************************************************
 class NFC:
         blockNumber   = 4		# because gladiolus
-        tag   = MFRC522.MFRC522()
-        spool = spool()
-        
-        # Ready!
+        DEBUG     = 1               # On/Off debug print
+        tag       = MFRC522()
+        spool     = spool()
+        hashCalc  = crc()
+        hashRead  = 0
+        validData = 0
+
         def checkTag(self, block):
                 (status,TagType) = self.tag.MFRC522_Request(self.tag.PICC_REQIDL)							# Scan for cards 
                 if status == self.tag.MI_OK:															    # If a card is found
@@ -76,7 +84,7 @@ class NFC:
                                 if status == self.tag.MI_OK:												# Check if authenticated
                                         return 1
                 return 0
-        # Ready!
+
         def readData(self,block):
                 recvData = []
                 recvData.append(self.tag.PICC_READ)
@@ -89,7 +97,7 @@ class NFC:
                 if status == self.tag.MI_OK:
                         return backData
                 return 0
-        # Ready!
+
         def readAll(self):
                 data = []
                 for x in range(0,64):
@@ -98,9 +106,26 @@ class NFC:
                             stat = self.checkTag(x)
                     data = self.readData(x)
                     print "Sector "+str(x)+" "+str(data)
-                        
+                      
+        def gr2mm(self,gr):
+                return gr/(self.spool.density * (math.pi*(self.spool.diametr/2)**2) * 0,001)
+        
+        def mm2gr(self,mm):
+                return self.spool.density * (math.pi*(self.spool.diametr/2)**2) * mm * 0,001
+                
+        def gr2mony(self,gr):
+                return gr*self.spool.price/self.spool.weight
+        
+        def mm2mony(self,mm):
+                gr = self.mm2gr(mm)
+                return self.gr2mony(gr)
+                
+        def balancePercent(self):
+                return self.spool.balance*100/self.spool.weight
+        
         def readSpool(self):
                 data = []
+                self.hashCalc.__init__()
                 #***********BLOCK 4***********
                 stat = 0
                 while (stat == 0):
@@ -114,6 +139,8 @@ class NFC:
                         self.spool.diametr  = data[diametrAdr]  | data[diametrAdr+1]<<8
                         self.spool.price    = data[priceAdr]    | data[priceAdr+1]<<8
                         self.spool.density  = data[densityAdr]  | data[densityAdr+1]<<8
+                        for i in range(0,16):
+                                self.hashCalc.update(chr(data[i]))
                 else: 
                         return 0
                 #***********BLOCK 5***********
@@ -125,6 +152,7 @@ class NFC:
                         self.spool.vender = ''
                         for i in range(0,16):
                                 self.spool.vender += chr(data[i])
+                                self.hashCalc.update(chr(data[i]))
                 else:
                         return 0
                 #***********BLOCK 6***********
@@ -137,30 +165,43 @@ class NFC:
                         self.spool.extMaxTemp = data[extMaxTempAdr] | data[extMaxTempAdr+1]<<8
                         self.spool.bedMinTemp = data[bedMinTempAdr] | data[bedMinTempAdr+1]<<8
                         self.spool.bedMaxTemp = data[bedMaxTempAdr] | data[bedMaxTempAdr+1]<<8
+                        self.hashRead         = data[heshAdr]
+                        for i in range(0,15):
+                                self.hashCalc.update(chr(data[i]))
                 else:
                         return 0
+                
+                if int(self.hashCalc.hexdigest(),16) == self.hashRead:
+                        validData = 1
+                else:
+                        validData = 0
+                        return 0
                 #********DEBUG******
-                print "********READING********"
-                print "material   = " + material[self.spool.material]
-                print "color      = " + colorStr[self.spool.color]
-                print "weight     = " + str(self.spool.weight) + " gr"
-                print "balance    = " + str(self.spool.balance) + " gr"
-                print "diametr    = " + str(self.spool.diametr*0.01) + " mm"
-                print "price      = " + str(self.spool.price) + " rub"
-                print "vender     = " + str(self.spool.vender) + " mm"
-                print "density    = " + str(self.spool.density*0.01)
-                print "extMinTemp = " + str(self.spool.extMinTemp) + " 'C"
-                print "extMaxTemp = " + str(self.spool.extMaxTemp) + " 'C"
-                print "bedMinTemp = " + str(self.spool.bedMinTemp) + " 'C"
-                print "bedMaxTemp = " + str(self.spool.bedMaxTemp) + " 'C"
-                print "***********************"
+                if (self.DEBUG == 1):
+                        print "material   = " + material[self.spool.material]
+                        print "color      = " + colorStr[self.spool.color]
+                        print "weight     = " + str(self.spool.weight) + " gr"
+                        print "balance    = " + str(self.spool.balance) + " gr"
+                        print "diametr    = " + str(self.spool.diametr*0.01) + " mm"
+                        print "price      = " + str(self.spool.price) + " rub"
+                        print "vender     = " + str(self.spool.vender)
+                        print "density    = " + str(self.spool.density*0.01) + " gr/cm^3"
+                        print "extMinTemp = " + str(self.spool.extMinTemp) + " 'C"
+                        print "extMaxTemp = " + str(self.spool.extMaxTemp) + " 'C"
+                        print "bedMinTemp = " + str(self.spool.bedMinTemp) + " 'C"
+                        print "bedMaxTemp = " + str(self.spool.bedMaxTemp) + " 'C"
+                        print "hash calc  = " + str(int(self.hashCalc.hexdigest(),16))
+                        print "hash read  = " + str(self.hashRead)
+                        print "hash valid = " + validData
                 #*******************
                 return 1
 
         def writeSpool(self):
+                self.hashCalc.__init__()
+                
                 outData = []
                 for i in range(0,16):
-                    outData.append(0x00)
+                        outData.append(0x00)
                 #***********BLOCK 4***********
                 stat = 0
                 outData[materialAdr]   = self.spool.material      & 0xFF
@@ -181,32 +222,38 @@ class NFC:
                 outData[priceAdr]      = self.spool.price         & 0xFF
                 outData[priceAdr+1]    = (self.spool.price>>8)    & 0xFF
                 
-                outData[densityAdr]    = self.spool.density         & 0xFF
-                outData[densityAdr+1]  = (self.spool.density>>8)    & 0xFF
+                outData[densityAdr]    = self.spool.density       & 0xFF
+                outData[densityAdr+1]  = (self.spool.density>>8)  & 0xFF
+                
+                for i in range (0,16):
+                    self.hashCalc.update(chr(outData[i]))   
                 
                 while (stat == 0):
-                    stat = self.checkTag(self.blockNumber)
+                        stat = self.checkTag(self.blockNumber)
                 self.tag.MFRC522_Write(self.blockNumber, outData)	# Write the data
                 self.tag.MFRC522_StopCrypto1()
                 #***********BLOCK 5***********
                 stat = 0
                 outData = []
                 for i in range(0,16):
-                    outData.append(0x00)
+                        outData.append(0x00)
                 l = len(self.spool.vender)
                 if (l > 16):
-                    l = 16
+                        l = 16
                 for i in range(0,l):
-                    outData[i] = ord(self.spool.vender[i])
+                        outData[i] = ord(self.spool.vender[i])
+                for i in range(0,16):
+                        self.hashCalc.update(chr(outData[i])) 
+                
                 while (stat == 0):
-                    stat = self.checkTag(self.blockNumber+1)
+                        stat = self.checkTag(self.blockNumber+1)
                 self.tag.MFRC522_Write(self.blockNumber+1, outData)	# Write the data
                 self.tag.MFRC522_StopCrypto1()
                 #***********BLOCK 6***********
                 stat = 0
                 outData = []
                 for i in range(0,16):
-                    outData.append(0x00)
+                        outData.append(0x00)
                 
                 outData[extMinTempAdr]   = self.spool.extMinTemp      & 0xFF
                 outData[extMinTempAdr+1] = (self.spool.extMinTemp>>8) & 0xFF
@@ -219,13 +266,22 @@ class NFC:
                 
                 outData[bedMaxTempAdr]   = self.spool.bedMaxTemp      & 0xFF
                 outData[bedMaxTempAdr+1] = (self.spool.bedMaxTemp>>8) & 0xFF
+                
+                for i in range (0,15):
+                    self.hashCalc.update(chr(outData[i]))   
+                outData[heshAdr] = int(self.hashCalc.hexdigest(),16)
+                
+                self.hashCalc.__init__()
+                
+                
                 while (stat == 0):
-                    stat = self.checkTag(self.blockNumber+2)
+                        stat = self.checkTag(self.blockNumber+2)
+                
                 self.tag.MFRC522_Write(self.blockNumber+2, outData)	# Write the data
                 self.tag.MFRC522_StopCrypto1()
-                
-                print "DONE"
-                return 0
+                if (self.DEBUG == 1):
+                        print "DONE"
+                return 1
 #*******************************************************************************
 #*******************************************************************************
 #*******************************************************************************
@@ -239,7 +295,9 @@ if __name__ == "__main__":
         print "*******************************************"
         while(continue_reading):
                 #NFC.readAll()
-                #NFC.writeSpool()
+                NFC.writeSpool()
+                print "*******************************************"
+                time.sleep(1)
                 NFC.readSpool()
                 print "*******************************************"
                 #data = NFC.readSpool()
