@@ -64,6 +64,7 @@ colorHex = [0x000000,	# noData
 
 
 class spool:
+    uid         = 0                 # UID of spool NFC 
     material	= 1					# ABS as default (from matirial list)
     color		= 1  		        # White as default (..)
     weight		= 1000				# gr (1kg as default)

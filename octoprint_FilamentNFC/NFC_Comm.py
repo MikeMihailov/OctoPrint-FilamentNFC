@@ -82,7 +82,7 @@ class NFC:
                                 self.tag.MFRC522_SelectTag(uid)												# Select the scanned tag
                                 status = self.tag.MFRC522_Auth(self.tag.PICC_AUTHENT1A, block, keyA, uid)	# Authenticate
                                 if status == self.tag.MI_OK:												# Check if authenticated
-                                        return 1
+                                        return uid
                 return 0
 
         def readData(self,block):
@@ -130,6 +130,7 @@ class NFC:
                 stat = 0
                 while (stat == 0):
                     stat = self.checkTag(self.blockNumber)
+                self.spool.uid =  stat[0] | stat[1] << 8 | stat[2] << 16 | stat[3] << 24 | stat[4] << 32
                 data = self.readData(self.blockNumber)
                 if len(data) == 16:
                         self.spool.material = data[materialAdr] | data[materialAdr+1]<<8
@@ -178,6 +179,7 @@ class NFC:
                         return 0
                 #********DEBUG******
                 if (self.DEBUG == 1):
+                        print "uid        = " + str(hex(self.spool.uid))     
                         print "material   = " + material[self.spool.material]
                         print "color      = " + colorStr[self.spool.color]
                         print "weight     = " + str(self.spool.weight) + " gr"
@@ -190,9 +192,9 @@ class NFC:
                         print "extMaxTemp = " + str(self.spool.extMaxTemp) + " 'C"
                         print "bedMinTemp = " + str(self.spool.bedMinTemp) + " 'C"
                         print "bedMaxTemp = " + str(self.spool.bedMaxTemp) + " 'C"
-                        print "hash calc  = " + str(int(self.hashCalc.hexdigest(),16))
-                        print "hash read  = " + str(self.hashRead)
-                        print "hash valid = " + validData
+                        print "hash calc  = " + str(hex(int(self.hashCalc.hexdigest(),16)))
+                        print "hash read  = " + str(hex(self.hashRead))
+                        print "hash valid = " + str(validData)
                 #*******************
                 return 1
 
@@ -295,19 +297,11 @@ if __name__ == "__main__":
         print "*******************************************"
         while(continue_reading):
                 #NFC.readAll()
-                NFC.writeSpool()
+                #NFC.writeSpool()
                 print "*******************************************"
                 time.sleep(1)
                 NFC.readSpool()
                 print "*******************************************"
-                #data = NFC.readSpool()
-                #if (data != 0):
-                #    print "Sector "+str(NFC.dataBlock)+" "+str(data)
-                #    print "*******************************************"
-                #    stat = 0
-                #    while (stat == 0):
-                #        stat = NFC.writeSpool()
-                #print "*******************************************"
                 time.sleep(10)
 #*******************************************************************************
 #*******************************************************************************
