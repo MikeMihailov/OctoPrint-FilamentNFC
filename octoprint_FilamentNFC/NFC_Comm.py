@@ -66,13 +66,13 @@ def end_read(signal,frame):
 #*******************************************************************************
 #*******************************************************************************
 class NFC:
-        blockNumber   = 4		# because gladiolus
-        DEBUG     = 1               # On/Off debug print
-        tag       = MFRC522()
-        spool     = spool()
-        hashCalc  = crc()
-        hashRead  = 0
-        validData = 0
+        blockNumber   = 4		    # because gladiolus
+        DEBUG         = 1           # On/Off debug print
+        tag           = MFRC522()
+        spool         = spool()
+        hashCalc      = crc()
+        hashRead      = 0
+        validData     = 0
 
         def checkTag(self, block):
                 (status,TagType) = self.tag.MFRC522_Request(self.tag.PICC_REQIDL)							# Scan for cards 

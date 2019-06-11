@@ -1,28 +1,22 @@
 # coding=utf-8
 from __future__ import absolute_import
-
-### (Don't forget to remove me)
-# This is a basic skeleton for your plugin's __init__.py. You probably want to adjust the class name of your plugin
-# as well as the plugin mixins it's subclassing from. This is really just a basic skeleton to get you started,
-# defining your plugin as a template plugin, settings and asset plugin. Feel free to add or remove mixins
-# as necessary.
-#
-# Take a look at the documentation on what other plugin mixins are available.
-
 import octoprint.plugin
-
+import NFC_Comm
+import signal
+import RPi.GPIO as GPIO
+    
 class FilamentnfcPlugin(octoprint.plugin.SettingsPlugin,
                         octoprint.plugin.AssetPlugin,
                         octoprint.plugin.TemplatePlugin):
 
 	##~~ SettingsPlugin mixin
 	def on_after_startup(self):
-		self._logger.info("Hello World!")
-
-	def get_settings_defaults(self):
-		return dict(
-			# put your plugin's default settings here
-		)
+		self._logger.info("Filament NFC (more: %s)" % self._settings.get(["material"]))
+        GPIO.setwarnings(False)
+        signal.signal(signal.SIGINT, end_read)  # Hook the SIGINT
+        GPIO.cleanup()
+        self.NFC       = NFC()
+        self.NFC.DEBUG = 0;
 
 	##~~ AssetPlugin mixin
 
@@ -30,11 +24,17 @@ class FilamentnfcPlugin(octoprint.plugin.SettingsPlugin,
 		# Define your plugin's asset files to automatically include in the
 		# core UI here.
 		return dict(
-			js=["js/FilamentNFC.js"],
-			css=["css/FilamentNFC.css"],
+			js  =["js/FilamentNFC.js"    ],
+			css =["css/FilamentNFC.css"  ],
 			less=["less/FilamentNFC.less"]
 		)
-
+    
+    def on_api_command(self, command, data):
+        if command == 'readNFC':
+            self.NFC.readSpool()
+        return 0
+            
+            
 	##~~ Softwareupdate hook
 
 	def get_update_information(self):
