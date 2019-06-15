@@ -70,7 +70,7 @@ class spool:
     weight		= 1000				# gr (1kg as default)
     balance		= weight			# gr (100% as default)
     diametr		= 175				# mm*10^-2
-    price		= 1200				# in rus rub as default (The most popular currency in the world ofcause)
+    price		= 1200				# in rus rub as default (The most popular currency in the world ofcourse)
     vender		= 'BestFilament'	# text line of 16 char max
     density     = 105               # gr/cm^3 *10^-2
     extMinTemp	= 220				# Extruder minimum temperature, 'C
