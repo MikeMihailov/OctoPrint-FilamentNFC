@@ -1,0 +1,69 @@
+<form class="form-horizontal">
+    <legend>
+		<span style="white-space: pre-wrap;">Common settings</span>
+	</legend>
+    <div>
+        <span>System of measurement:</span>
+        <select>
+            <option>Systeme International</option>
+            <option>Imperial system</option>
+        </select>
+    </div>
+	<div>
+		<span>Currency:</span>
+		<select>
+            <option>Rubles &#x20bd </option>
+            <option>Hryvnia &#8372 </option>
+			<option>Tenge &#1083 </option>
+			<option>Crowns &#107 </option>
+			<option>Rial &#90 </option>
+			<option>Riel &#6107 </option>
+			<option>Bolivar &#66 </option>
+			<option>Guilder &#402 </option>
+			<option>Colon &#8353 </option>
+			<option>Quetzal &#81 </option>
+			<option>Tughrik &#8366 </option>
+			<option>Metical &#77 </option>
+			<option>Rupee &#8360 </option>
+			<option>Naira &#8358 </option>
+			<option>Dollars &#36 </option>
+			<option>Zloty &#122 </option>
+			<option>Euro &#8364 </option>
+			<option>Pounds &#163 </option>
+			<option>Franks &#67 </option>
+			<option>Jenna &#165 </option>
+			<option>Yuan &#165 </option>
+			<option>Dongs &#8363 </option>
+			<option>Won &#8361 </option>
+			<option>Baht &#3647 </option>
+			<option>Kip &#8365 </option>
+        </select>
+	</div>
+</form>
+    <legend>
+		<span style="white-space: pre-wrap;">Spool read/write</span>
+	</legend>
+    <form class="form-horizontal">
+		<div>
+			<button id="nfcReadSettings" data-bind="click: readSpoolSettings" class="btn icon-download-alt" aria-hidden="true">&nbsp;{{ _('Read') }}</button>
+			<button id="nfcWriteSettings" data-bind="click: writeSpoolSettings" class="btn icon-upload-alt" aria-hidden="true">&nbsp;{{ _('Write') }}</button>
+			<button id="nfcEraseSettings" data-bind="click: eraseSpoolSettings" class="btn icon-eraser" aria-hidden="true">&nbsp;{{ _('Erase') }}</button>
+		</div>
+		<br>
+		<div>
+			<span>UID:</span>
+			<input type="number" class="input-small text-right" disabled>
+			<span>Material:</span>
+			<span>Color:</span>
+			<span>Weight:</span>
+			<span>Balance:</span>
+			<span>Diametr:</span>
+			<span>Price:</span>
+			<span>Vender:</span>
+			<span>Density:</span>
+			<span>Extruder minimal temperature:</span>
+			<span>Extruder maximum temperature:</span>
+			<span>Bed minimal temperature:</span>
+			<span>Bed maximum temperature:</span>
+		</div>
+    </form>

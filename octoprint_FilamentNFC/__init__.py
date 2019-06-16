@@ -12,6 +12,7 @@ import flask
 import logging
 
 from .NFC_Comm import *
+from .PlasticData import spool,material,colorStr
 import RPi.GPIO as GPIO
 
 class FilamentnfcPlugin(octoprint.plugin.StartupPlugin,
@@ -20,6 +21,10 @@ class FilamentnfcPlugin(octoprint.plugin.StartupPlugin,
                         octoprint.plugin.SimpleApiPlugin,
                         octoprint.plugin.SettingsPlugin):
     ##~~ SettingsPlugin mixin
+    def get_settings_defaults(self):
+        return dict(massUnit = 'gr')
+
+    ##~~ StartupPlugin mixin
     def on_after_startup(self):
         self._logger.info(">>Filament NFC is startup")
         GPIO.setwarnings(False)
@@ -34,16 +39,19 @@ class FilamentnfcPlugin(octoprint.plugin.StartupPlugin,
         )
 
     def on_api_get(self, request):
-        self.nfc.readSpool()
+        res = self.nfc.readSpool()
+        if (res == 0):
+            self.nfc.spool.clean()
+        vender = self.nfc.spool.vender.replace('\x00','')
         list = {
                 "uid"        : self.nfc.spool.uid,
-                "material"   : self.nfc.spool.material,
-                "color"      : self.nfc.spool.color,
+                "material"   : material[self.nfc.spool.material],
+                "color"      : colorStr[self.nfc.spool.color],
                 "weight"     : self.nfc.spool.weight,
                 "balance"    : self.nfc.spool.balance,
                 "diametr"    : self.nfc.spool.diametr,
                 "price"      : self.nfc.spool.price,
-                "vender"     : self.nfc.spool.vender,
+                "vender"     : vender,
                 "density"    : self.nfc.spool.density,
                 "extMinTemp" : self.nfc.spool.extMinTemp,
                 "extMaxTemp" : self.nfc.spool.extMaxTemp,
@@ -52,22 +60,11 @@ class FilamentnfcPlugin(octoprint.plugin.StartupPlugin,
         }
         return json.dumps(list)
 
-
-
-
-
-
-
-
-
-
     def on_api_command(self, command, data):
         if command == 'readSpool':
             self.nfc.readSpool()
             parameter = self.nfc.spool.uid;
             self._plugin_manager.send_plugin_message(self._identifier, self.nfc.spool.vender)
-
-
 
     ##~~ AssetPlugin mixin
     def get_assets(self):
