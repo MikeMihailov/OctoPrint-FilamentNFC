@@ -77,17 +77,6 @@ class NFCmodule:
         self.DEBUG         = 1           # On/Off debug print
         self.scanAttempts  = 2
 
-    def checkTag(self, block):
-        (status,TagType) = self.tag.MFRC522_Request(self.tag.PICC_REQIDL)                   # Scan for cards 
-        if status == self.tag.MI_OK:                                                        # If a card is found
-            (status,uid) = self.tag.MFRC522_Anticoll()                                      # Get the UID of the card
-            if status == self.tag.MI_OK:                                                    # If we have the UID, continue
-                self.tag.MFRC522_SelectTag(uid)                                             # Select the scanned tag
-                status = self.tag.MFRC522_Auth(self.tag.PICC_AUTHENT1A, block, keyA, uid)   # Authenticate
-                if status == self.tag.MI_OK:                                                # Check if authenticated
-                    return uid
-        return 0
-
     def readData(self,block):
         recvData = []
         recvData.append(self.tag.PICC_READ)
@@ -103,12 +92,20 @@ class NFCmodule:
 
     def readAll(self):
         data = []
-        for x in range(0,64):
-            stat = 0
+        stat = 0
+        if (self.tag.tagType == self.tag.mifareUltralight):
             while (stat == 0):
-                stat = self.checkTag(x)
-            data = self.readData(x)
+                stat = self.tag.MFRC522_GetAccess(0)
+        for x in range(0,64):
+            if (self.tag.tagType != self.tag.mifareUltralight):
+                while (stat == 0):
+                    stat = self.tag.MFRC522_GetAccess(x)
+            data = self.tag.MFRC522_Read(x)
+            if (self.tag.tagType != self.tag.mifareUltralight):
+                self.tag.MFRC522_StopCrypto1()
             print "Sector "+str(x)+" "+str(data)
+        self.tag.MFRC522_StopCrypto1()
+        return 1
 
     def gr2mm(self,gr):
         return gr/(self.spool.density * (math.pi*(self.spool.diametr/2)**2) * 0,001)
@@ -132,7 +129,7 @@ class NFCmodule:
         #***********BLOCK 4***********
         stat = 0
         for att in range(self.scanAttempts):
-            stat = self.checkTag(self.blockNumber)
+            stat = self.tag.MFRC522_GetAccess(self.blockNumber)
             if stat != 0:
                 break
         if stat == 0:
@@ -154,7 +151,7 @@ class NFCmodule:
         #***********BLOCK 5***********
         stat = 0
         for att in range(self.scanAttempts):
-            stat = self.checkTag(self.blockNumber)
+            stat = self.tag.MFRC522_GetAccess(self.blockNumber)
             if stat != 0:
                 break
         if stat == 0:
@@ -170,7 +167,7 @@ class NFCmodule:
         #***********BLOCK 6***********
         stat = 0
         for att in range(self.scanAttempts):
-            stat = self.checkTag(self.blockNumber)
+            stat = self.tag.MFRC522_GetAccess(self.blockNumber)
             if stat != 0:
                 break
         if stat == 0:
@@ -236,7 +233,7 @@ class NFCmodule:
         for i in range (0,16):
             self.hashCalc.update(chr(outData[i]))   
         while (stat == 0):
-            stat = self.checkTag(self.blockNumber)
+            stat = self.tag.MFRC522_GetAccess(self.blockNumber)
         self.tag.MFRC522_Write(self.blockNumber, outData)   # Write the data
         self.tag.MFRC522_StopCrypto1()
         #***********BLOCK 5***********
@@ -252,7 +249,7 @@ class NFCmodule:
         for i in range(0,16):
             self.hashCalc.update(chr(outData[i])) 
         while (stat == 0):
-            stat = self.checkTag(self.blockNumber+1)
+            stat = self.tag.MFRC522_GetAccess(self.blockNumber+1)
         self.tag.MFRC522_Write(self.blockNumber+1, outData) # Write the data
         self.tag.MFRC522_StopCrypto1()
         #***********BLOCK 6***********
@@ -273,7 +270,7 @@ class NFCmodule:
         outData[heshAdr] = int(self.hashCalc.hexdigest(),16)
         self.hashCalc.__init__()
         while (stat == 0):
-            stat = self.checkTag(self.blockNumber+2)
+            stat = self.tag.MFRC522_GetAccess(self.blockNumber+2)
         self.tag.MFRC522_Write(self.blockNumber+2, outData) # Write the data
         self.tag.MFRC522_StopCrypto1()
         if (self.DEBUG == 1):
@@ -291,11 +288,11 @@ if __name__ == "__main__":
     print "NFC test:"
     print "*******************************************"
     while(continue_reading):
-        #NFC.readAll()
+        NFC.readAll()
         #NFC.writeSpool()
         print "*******************************************"
         time.sleep(1)
-        NFC.readSpool()
+        #NFC.readSpool()
         print "*******************************************"
         time.sleep(10)
 #*******************************************************************************
