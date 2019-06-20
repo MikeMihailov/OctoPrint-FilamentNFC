@@ -177,10 +177,15 @@ class MFRC522:
     Reserved33        = 0x3E
     Reserved34        = 0x3F
 
-    mifareUltralight  = 1
+    mifareUltralight  = 1   # ULC
     mifareClassic1K   = 2
     mifareClassic2K   = 3
     mifareClassic4K   = 4
+    
+    MI_ULC_SIZE       = 45
+    MI_CLS1K_SIZE     = 64
+    MI_CLS2K_SIZE     = 64
+    MI_CLS4K_SIZE     = 64
     
     mifareATQA = [0x0000,0x0044,0x0004,0x0005,0x0002]
     mifareName = ['None','Ultralight','Clssic 1K','Clssic 2K','Classic4K']
@@ -199,9 +204,10 @@ class MFRC522:
     tagType      = 0
     tagAuth      = 0
     uidLen       = 4
+    memSize      = 0
     cascadeLevel = 1
     
-    DEBUG = 1
+    DEBUG = 0
 #******************************************************************************************
 #******************************************************************************************
 #******************************************************************************************
@@ -216,22 +222,28 @@ class MFRC522:
     def mifareCardSelect(self, SAK):     # See AN10834 "MIFARE ISO/IEC 14443 PICC Selection"
         type = 0
         auth = 0
+        size = 0
         if (SAK == 0x00):
             type = self.mifareUltralight
             auth = 0
+            size = self.MI_ULC_SIZE
         if (SAK == 0x08):
             type = self.mifareClassic1K
             auth = 1
+            size = self.MI_CLS1K_SIZE
         if (SAK == 0x19):
             type = self.mifareClassic2K
             auth = 1
+            size = self.MI_CLS2K_SIZE
         if (SAK == 0x18):
             type = self.mifareClassic4K
             auth = 1
+            size = self.MI_CLS4K_SIZE
         if (self.DEBUG):
             print ">>Mifare type = "+self.mifareName[type]
             print ">>Authication = "+str(auth)
-        return (type,auth)
+            print ">>Memory size = "+str(size)
+        return (type,auth,size)
 #******************************************************************************************
     def MFRC522_Reset(self):
         self.Write_MFRC522(self.CommandReg, self.PCD_RESETPHASE)
@@ -367,7 +379,8 @@ class MFRC522:
             if self.DEBUG:
                 print ">>Data №" + str(i+1) + " = " + str(data)
             i=i+1
-        del buf[0]
+        if self.cascadeLevel>1:
+            del buf[0]
         i=len(buf)
         while i>0:
             uid.append(buf[i-1])
@@ -383,8 +396,6 @@ class MFRC522:
             return 0
         else:
             return uid
-#******************************************************************************************
-
 #******************************************************************************************
     def MFRC522_Anticoll(self,CLn):
         if (self.DEBUG):
@@ -441,8 +452,9 @@ class MFRC522:
         (status,backData,backLen) = self.MFRC522_ToCard(self.PCD_TRANSCEIVE,buf)
         if (status == self.MI_OK) & (backLen == 0x18):
             self.SAK = backData[0]
-            (self.tagType,self.tagAuth) = self.mifareCardSelect(self.SAK)
-            print ">>SAK         = " + str(self.SAK)
+            (self.tagType,self.tagAuth,self.memSize) = self.mifareCardSelect(self.SAK)
+            if self.DEBUG:
+                print ">>SAK         = " + str(self.SAK)
             return backData[0]
         else:
             return 0
@@ -485,17 +497,19 @@ class MFRC522:
         pOut = self.CalulateCRC(recvData)
         recvData.append(pOut[0])
         recvData.append(pOut[1])
-        (status, backData, backLen) = self.MFRC522_ToCard(self.PCD_TRANSCEIVE, recvData)
+        (status,backData,backLen) = self.MFRC522_ToCard(self.PCD_TRANSCEIVE,recvData)
         if not(status == self.MI_OK):
             print "Error while reading!"
             return None
         i = 0
         if len(backData) == 16:
-            print "Sector "+str(blockAddr)+" "+str(backData)
             return backData
         return None
 #******************************************************************************************
     def MFRC522_Write(self, blockAddr, writeData):
+        if len(writeData) != 16:
+            print "Error: Length of message not 16 byte!"
+            return 0
         buff = []
         buff.append(self.PICC_WRITE)
         buff.append(blockAddr)
@@ -520,6 +534,7 @@ class MFRC522:
                 print "Error while writing"
             if status == self.MI_OK:
                 print "Data written"
+        return 1
 #******************************************************************************************
     def MFRC522_DumpClassic1K(self, key, uid):
         i = 0
