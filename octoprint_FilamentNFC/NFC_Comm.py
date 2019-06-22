@@ -172,7 +172,7 @@ class NFCmodule:
             self.readSpoolClassic()
         else:
             self.readSpoolUtl()
-        return
+        return 1
 #******************************************************************************************
     def readSpoolUtl(self):
         data = []

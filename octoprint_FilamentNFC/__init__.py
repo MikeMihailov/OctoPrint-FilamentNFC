@@ -22,7 +22,7 @@ class FilamentnfcPlugin(octoprint.plugin.StartupPlugin,
                         octoprint.plugin.SettingsPlugin):
     ##~~ SettingsPlugin mixin
     def get_settings_defaults(self):
-        return dict(massUnit = 'gr')
+        return dict(massUnit = 'gr',scanInterval=3.0)
 
     ##~~ StartupPlugin mixin
     def on_after_startup(self):
@@ -31,6 +31,15 @@ class FilamentnfcPlugin(octoprint.plugin.StartupPlugin,
         GPIO.cleanup()
         self.nfc=NFCmodule()
         self.nfc.DEBUG=0
+        self.t = octoprint.util.RepeatedTimer(1.0,self.updateData)
+        self.t.start()
+
+    def updateData(self):
+        res=self.nfc.readSpool()
+        if res==1:
+            self._plugin_manager.send_plugin_message(self._identifier,res)
+        if res==0:
+            self.nfc.spool.clean()
 
     ##~~ SimpleApiPlugin mixin
     def get_api_commands(self):
@@ -39,9 +48,9 @@ class FilamentnfcPlugin(octoprint.plugin.StartupPlugin,
         )
 
     def on_api_get(self, request):
-        res = self.nfc.readSpool()
-        if (res == 0):
-            self.nfc.spool.clean()
+        #res = self.nfc.readSpool()
+        #if (res == 0):
+        #    self.nfc.spool.clean()
         vender = self.nfc.spool.vender.replace('\x00','')
         list = {
                 "uid"        : self.nfc.spool.uid,

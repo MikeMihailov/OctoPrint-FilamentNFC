@@ -1,69 +1,118 @@
 <form class="form-horizontal">
+    <fieldset>
+        <legend>
+            <span style="white-space: pre-wrap;">Common settings</span>
+        </legend>
+    
+        <div class="control-group" title="System of measurement">
+            <label class="control-label" for="settings-systemMeasurement">System of measurement</label>
+            <div class="controls">
+                <select id="settings-systemMeasurement" name="settings-systemMeasurement" data-bind="options: systemMeasurementOption, optionsCaption: 'Systeme International', value: systemMeasurement"></select>
+            </div>
+        </div>
+        
+        <div class="control-group" title="Currency">
+            <label class="control-label" for="settings-currency">Currency</label>
+            <div class="controls">
+                <select id="settings-currency" name="settings-currency" data-bind="options: currencyOption, optionsCaption: 'Rubles &#x20bd', value: currency"></select>
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <label class="control-label" for="settings-ScanPeriod">Set period of nfc scan</label>
+            <div class="controls">
+                <input type="text" class="input-append" id="settings-ScanPeriod" data-bind="value: ScanPeriod">
+            </div>
+        </div>
+    </fieldset>
+    
     <legend>
-		<span style="white-space: pre-wrap;">Common settings</span>
-	</legend>
-    <div>
-        <span>System of measurement:</span>
-        <select>
-            <option>Systeme International</option>
-            <option>Imperial system</option>
-        </select>
+        <span style="white-space: pre-wrap;">Spool read/write</span>
+    </legend>
+    <div class="btn-group" role="group" aria-label="RW control">
+        <button id="nfcReadSettings" data-bind="click: readSpoolSettings" class="btn icon-download-alt" aria-hidden="true">&nbsp;{{ _('Read') }}</button>
+        <button id="nfcWriteSettings" data-bind="click: writeSpoolSettings" class="btn icon-upload-alt" aria-hidden="true">&nbsp;{{ _('Write') }}</button>
+        <button id="nfcEraseSettings" data-bind="click: eraseSpoolSettings" class="btn icon-eraser" aria-hidden="true">&nbsp;{{ _('Erase') }}</button>
     </div>
-	<div>
-		<span>Currency:</span>
-		<select>
-            <option>Rubles &#x20bd </option>
-            <option>Hryvnia &#8372 </option>
-			<option>Tenge &#1083 </option>
-			<option>Crowns &#107 </option>
-			<option>Rial &#90 </option>
-			<option>Riel &#6107 </option>
-			<option>Bolivar &#66 </option>
-			<option>Guilder &#402 </option>
-			<option>Colon &#8353 </option>
-			<option>Quetzal &#81 </option>
-			<option>Tughrik &#8366 </option>
-			<option>Metical &#77 </option>
-			<option>Rupee &#8360 </option>
-			<option>Naira &#8358 </option>
-			<option>Dollars &#36 </option>
-			<option>Zloty &#122 </option>
-			<option>Euro &#8364 </option>
-			<option>Pounds &#163 </option>
-			<option>Franks &#67 </option>
-			<option>Jenna &#165 </option>
-			<option>Yuan &#165 </option>
-			<option>Dongs &#8363 </option>
-			<option>Won &#8361 </option>
-			<option>Baht &#3647 </option>
-			<option>Kip &#8365 </option>
-        </select>
-	</div>
+    <br>
+    <br>
+    <div class="control-group" title="UID">
+        <label class="control-label">UID:</label>
+        <div class="controls">
+            <input type="number" class="input-append" disabled>
+        </div>
+    </div>
+    <div class="control-group" title="Material">
+        <label class="control-label">Material:</label>
+        <div class="controls">
+            <select id="rw-material" name="rw-material" data-bind="options: materialOption, optionsCaption: 'ABS', value: material"></select>
+        </div>
+    </div>
+    <div class="control-group" title="Color">
+        <label class="control-label">Color:</label>
+        <div class="controls">
+            <select id="rw-color"name="rw-color" data-bind="options: materialOption, optionsCaption: 'White', value: color"></select>
+        </div>
+    </div>
+    <div class="control-group" title="Weight">
+        <label class="control-label">Weight kg:</label>
+        <div class="controls">
+            <input type="number"class="input-append">
+        </div>
+    </div>
+    <div class="control-group" title="Balance">
+        <label class="control-label">Balance kg:</label>
+        <div class="controls">
+            <input type="number"class="input-append">
+        </div>
+    </div>
+    <div class="control-group" title="Diametr">
+        <label class="control-label">Diametr mm<sup>2</sup>:</label>
+        <div class="controls">
+            <input type="number"step="0.1"class="input-append">
+        </div>
+    </div>
+    <div class="control-group" title="Price">
+        <label class="control-label">Price \u20BD:</label>
+        <div class="controls">
+            <input type="number"step="100"class="input-append">
+        </div>
+    </div>
+    <div class="control-group" title="Vender">
+        <label class="control-label">Vender:</label>
+        <div class="controls">
+            <input type="text"class="input-append">
+        </div>
+    </div>
+    <div class="control-group" title="Density">
+        <label class="control-label">Density gr/cm<sup>3</sup>*10<sup>-2</sup>:</label>
+        <div class="controls">
+            <input type="number"class="input-append">
+        </div>
+    </div>
+    <div class="control-group" title="Extruder minimal temperatureก">
+        <label class="control-label">Extruder minimal temperature <sup>o</sup>C:</label>
+        <div class="controls">
+            <input type="number"step="10"class="input-append">
+        </div>
+    </div>
+    <div class="control-group" title="Extruder maximum temperature">
+        <label class="control-label">Extruder maximum temperature <sup>o</sup>C:</label>
+        <div class="controls">
+            <input type="number"step="10"class="input-append">
+        </div>
+    </div>
+    <div class="control-group" title="Bed minimal temperature">
+        <label class="control-label">Bed minimal temperature <sup>o</sup>C:</label>
+        <div class="controls">
+            <input type="number"step="10"class="input-append">
+        </div>
+    </div>
+    <div class="control-group" title="Bed maximum temperature">
+        <label class="control-label">Bed maximum temperature <sup>o</sup>C:</label>
+        <div class="controls">
+            <input type="number"step="10"class="input-append">
+        </div>
+    </div>
 </form>
-    <legend>
-		<span style="white-space: pre-wrap;">Spool read/write</span>
-	</legend>
-    <form class="form-horizontal">
-		<div>
-			<button id="nfcReadSettings" data-bind="click: readSpoolSettings" class="btn icon-download-alt" aria-hidden="true">&nbsp;{{ _('Read') }}</button>
-			<button id="nfcWriteSettings" data-bind="click: writeSpoolSettings" class="btn icon-upload-alt" aria-hidden="true">&nbsp;{{ _('Write') }}</button>
-			<button id="nfcEraseSettings" data-bind="click: eraseSpoolSettings" class="btn icon-eraser" aria-hidden="true">&nbsp;{{ _('Erase') }}</button>
-		</div>
-		<br>
-		<div>
-			<span>UID:</span>
-			<input type="number" class="input-small text-right" disabled>
-			<span>Material:</span>
-			<span>Color:</span>
-			<span>Weight:</span>
-			<span>Balance:</span>
-			<span>Diametr:</span>
-			<span>Price:</span>
-			<span>Vender:</span>
-			<span>Density:</span>
-			<span>Extruder minimal temperature:</span>
-			<span>Extruder maximum temperature:</span>
-			<span>Bed minimal temperature:</span>
-			<span>Bed maximum temperature:</span>
-		</div>
-    </form>
+
