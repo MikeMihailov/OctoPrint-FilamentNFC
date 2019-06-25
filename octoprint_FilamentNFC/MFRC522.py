@@ -208,6 +208,8 @@ class MFRC522:
     cascadeLevel = 1
     
     DEBUG = 0
+    
+    status = 0    # Status of RC522, 1 - onLine, 0 - communication ERROR
 #******************************************************************************************
 #******************************************************************************************
 #******************************************************************************************
@@ -217,7 +219,7 @@ class MFRC522:
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(self.NRSTPD, GPIO.OUT)
         GPIO.output(self.NRSTPD, 1)
-        self.MFRC522_Init()
+        self.status = self.MFRC522_Init()
 #******************************************************************************************
     def mifareCardSelect(self, SAK):     # See AN10834 "MIFARE ISO/IEC 14443 PICC Selection"
         type = 0
@@ -267,6 +269,12 @@ class MFRC522:
         temp = self.Read_MFRC522(self.TxControlReg)
         if(~(temp & 0x03)):
             self.SetBitMask(self.TxControlReg, 0x03)
+        temp = self.Read_MFRC522(self.TxControlReg)
+        if(temp & 0x03):
+            print "RC522 communication ERROR!"
+            return 1
+        else:
+            return 0
 #******************************************************************************************
     def AntennaOff(self):
         self.ClearBitMask(self.TxControlReg, 0x03)
@@ -556,7 +564,8 @@ class MFRC522:
         self.Write_MFRC522(self.TReloadRegH,      0)
         self.Write_MFRC522(self.TxASKReg,      0x40)
         self.Write_MFRC522(self.ModeReg,       0x3D)
-        self.AntennaOn()
+        res = self.AntennaOn()
+        return res
 #******************************************************************************************
 #******************************************************************************************
 #******************************************************************************************

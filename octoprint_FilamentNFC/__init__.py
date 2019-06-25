@@ -22,24 +22,31 @@ class FilamentnfcPlugin(octoprint.plugin.StartupPlugin,
                         octoprint.plugin.SettingsPlugin):
     ##~~ SettingsPlugin mixin
     def get_settings_defaults(self):
-        return dict(massUnit = 'gr',scanInterval=3.0)
+        return dict(sysMeas=0,currency=0,scanInterval=3.0)
 
     ##~~ StartupPlugin mixin
     def on_after_startup(self):
-        self._logger.info(">>Filament NFC is startup")
+        self._logger.info(">>FilamentNFC: Plugin is startup")
         GPIO.setwarnings(False)
         GPIO.cleanup()
         self.nfc=NFCmodule()
+        if self.nfc.tag.status==0:
+            self._logger.info(">>FilamentNFC: RC522 communication ERROR!")
         self.nfc.DEBUG=0
+        self.nfc.tag.DEBUG=0
         self.t = octoprint.util.RepeatedTimer(1.0,self.updateData)
         self.t.start()
 
     def updateData(self):
-        res=self.nfc.readSpool()
-        if res==1:
-            self._plugin_manager.send_plugin_message(self._identifier,res)
-        if res==0:
-            self.nfc.spool.clean()
+        if self.nfc.tag.status==1:
+            res=self.nfc.readSpool()
+            if res==1:
+                self._plugin_manager.send_plugin_message(self._identifier,3)
+            if res==0:
+                self._plugin_manager.send_plugin_message(self._identifier,2)
+                self.nfc.spool.clean()
+        else:
+            self._plugin_manager.send_plugin_message(self._identifier,1)
 
     ##~~ SimpleApiPlugin mixin
     def get_api_commands(self):

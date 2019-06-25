@@ -76,11 +76,13 @@ $(function() {
                     'natural'
                    ]
         //*******************************PARAM*******************************
+        self.status       = 0
         self.allSettings  = parameters[0];
         self.loginState   = parameters[1];
         self.printerState = parameters[2];
         //*******************************************************************
         self.onAfterBinding = function() {
+            self.status       = document.getElementById("status");
             self.uid          = document.getElementById("uid");
             self.material     = document.getElementById("material");
             self.color        = document.getElementById("color");
@@ -123,15 +125,28 @@ $(function() {
         //********************************API********************************
         //*******************************************************************
         self.onDataUpdaterPluginMessage = function(plugin, message){
-            if (plugin != "FilamentNFC") return;
-            if (message){
-                self.sendReadSpool();
+            if (plugin!="FilamentNFC"){
+                return;
+            }
+            if (message==1){                        // RC522 communication ERROR!
+                self.status.textContent = "RC522 communication ERROR!"
+                self.status = 0
+            }
+            if (message==2){                        // New nfc data from RC522
+                self.status.textContent = "Online"
+                self.status = 1
+            }
+            if (message==3){                        // New nfc data from RC522
+                if (self.status == 1){
+                    self.sendReadSpool();
+                }
             }
         }
         
         self.sendReadSpool = function(data) {
             OctoPrint.simpleApiGet("FilamentNFC")
                 .done(function(response) {
+                    self.status.textContent     = "Online"
                     self.uid.textContent        = response.uid;
                     self.material.textContent   = response.material;
                     self.color.textContent      = response.color;
