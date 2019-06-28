@@ -7,6 +7,7 @@ import sys
 from octoprint.events import eventManager, Events
 from octoprint.server.util.flask import restricted_access
 from octoprint.server import admin_permission
+from octoprint.util import RepeatedTimer
 import json
 import flask
 import logging
@@ -20,24 +21,58 @@ class FilamentnfcPlugin(octoprint.plugin.StartupPlugin,
                         octoprint.plugin.AssetPlugin,
                         octoprint.plugin.SimpleApiPlugin,
                         octoprint.plugin.SettingsPlugin):
+    interval = 3.0
     ##~~ SettingsPlugin mixin
     def get_settings_defaults(self):
-        return dict(sysMeas=0,currency=0,scanInterval=3.0)
+        return dict(
+                currency=5,
+                scanPeriod=3.0
+        )
+
+    #def get_template_vars(self):
+        #return dict(
+                #currency=self._settings.get(["currency"]),
+                #scanPeriod=self._settings.get(["scanPeriod"])
+        #)
+
+    def get_template_configs(self):
+        return [
+            dict(type="sidebar", template="FilamentNFC_sidebar.jinja2", custom_bindings=False),
+            dict(type="settings", template="FilamentNFC_settings.jinja2", custom_bindings=False)
+        ]
+
+    def on_settings_save(self, data):
+        octoprint.plugin.SettingsPlugin.on_settings_save(self,data)
+        self.scanPeriod=float(self._settings.get(["scanPeriod"]))
+        self.restartTimer(self.scanPeriod)
 
     ##~~ StartupPlugin mixin
     def on_after_startup(self):
-        self._logger.info(">>FilamentNFC: Plugin is startup")
+        self._logger.info(">>Plugin is startup")
+        self.scanPeriod=float(self._settings.get(["scanPeriod"]))
         GPIO.setwarnings(False)
         GPIO.cleanup()
         self.nfc=NFCmodule()
         if self.nfc.tag.status==0:
-            self._logger.info(">>FilamentNFC: RC522 communication ERROR!")
-        self.nfc.DEBUG=0
-        self.nfc.tag.DEBUG=0
-        self.t = octoprint.util.RepeatedTimer(1.0,self.updateData)
-        self.t.start()
+            self._logger.info(">>RC522 communication ERROR!")
+        self.nfc.info=0
+        self.nfc.tag.info=0
+        self.startTimer(self.scanPeriod)
+
+    def restartTimer(self,interval):
+        if self.timer:
+            self._logger.info(">>Stopping Timer...")
+            self.timer.cancel()
+            self.timer = None
+            self.startTimer(interval)
+
+    def startTimer(self,interval):
+        self._logger.info(">>Starting Timer...")
+        self.timer = RepeatedTimer(interval,self.updateData)
+        self.timer.start()
 
     def updateData(self):
+        self._logger.info(">>Timer!")
         if self.nfc.tag.status==1:
             res=self.nfc.readSpool()
             if res==1:
@@ -47,6 +82,8 @@ class FilamentnfcPlugin(octoprint.plugin.StartupPlugin,
                 self.nfc.spool.clean()
         else:
             self._plugin_manager.send_plugin_message(self._identifier,1)
+            
+    
 
     ##~~ SimpleApiPlugin mixin
     def get_api_commands(self):
@@ -55,9 +92,6 @@ class FilamentnfcPlugin(octoprint.plugin.StartupPlugin,
         )
 
     def on_api_get(self, request):
-        #res = self.nfc.readSpool()
-        #if (res == 0):
-        #    self.nfc.spool.clean()
         vender = self.nfc.spool.vender.replace('\x00','')
         list = {
                 "uid"        : self.nfc.spool.uid,
