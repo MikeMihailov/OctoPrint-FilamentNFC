@@ -5,7 +5,7 @@
  * License: AGPLv3
  */
 $(function() {
-    function FilamentnfcViewModel(parameters) {
+    function FilamentnfcViewModel(parameters){
         var self = this;
         currencyList = ["\u20BD",
                         "\u20B4",
@@ -71,8 +71,7 @@ $(function() {
                     'light blue',
                     'natural'
                    ]
-        //*******************************PARAM*******************************
-        self.status  = ko.observable();
+        //*******************************************************************
         material     = ko.observable();
         uid          = ko.observable();
         color        = ko.observable();
@@ -87,17 +86,22 @@ $(function() {
         bedMinTemp   = ko.observable();
         bedMaxTemp   = ko.observable();
         currency     = ko.observable();
-        materialOptions   = ko.observableArray([]);
-        colorOptions      = ko.observableArray([]);
-        currencySel       = ko.observable();
+        statusTimer  = ko.observable();
+        statusRC522  = ko.observable();
+        statusTag    = ko.observable();
+        materialOptions = ko.observableArray([]);
+        colorOptions    = ko.observableArray([]);
+        currencySel     = ko.observable();
         self.LoginStateViewModel   = parameters[0];
         self.SettingsViewModel     = parameters[1];
         self.PrinterStateViewModel = parameters[2];
-        self.nfcStatus = 0;
         self.settings = self.SettingsViewModel.settings;
         //*******************************************************************
-        self.onAfterBinding = function() {
+        self.onAfterBinding = function(){
             currency(parameters[1].settings.plugins.FilamentNFC.currency());
+            statusTimer("On");
+            statusRC522("Offline");
+            statusTag("No tag");
             self.systemMeas   = document.getElementById("rw-material");
             for(var i=0;i<materialList.length;i++){
                 materialOptions.push(materialList[i]);
@@ -126,32 +130,35 @@ $(function() {
 
         stopTimer = function(){
             self.sendWriteSpool("stopTimer");
+            statusTimer("Off");
         }
 
         startTimer = function(){
             self.sendWriteSpool("startTimer");
+            statusTimer("On");
         }
         //*******************************************************************
         //********************************API********************************
         //*******************************************************************
-        self.onDataUpdaterPluginMessage = function(plugin, message){
+        self.onDataUpdaterPluginMessage = function(plugin,message){
             if (plugin!="FilamentNFC"){
                 return;
             }
             if (message==1){                        // RC522 communication ERROR!
-                self.status("RC522 communication ERROR!");
-                self.nfcStatus = 0
+                statusRC522("RC522 communication ERROR!");
             }
-            if (message==2){                        // New nfc data from RC522
-                self.status("Online");
-                self.nfcStatus = 1
+            if (message==2){                        // No nfc data from RC522
+                statusRC522("Online");
+                statusTag("No tag");
             }
             if (message==3){                        // New nfc data from RC522
+                statusRC522("Online");
+                statusTag("Tag detected");
                 self.sendReadSpool();
             }
         }
 
-        self.sendWriteSpool = function(command) {
+        self.sendWriteSpool = function(command){
             if (command == "writeSpool"){
                 bufWeight = 0;
                 for(var i=0;i<materialList.length;i++){
@@ -179,40 +186,39 @@ $(function() {
                         "bedMaxTemp" : bedMaxTemp()
                        };
                 console.log(data);
-                OctoPrint.simpleApiCommand("FilamentNFC", "writeSpool", data)
-                    .done(function(response) {
+                OctoPrint.simpleApiCommand("FilamentNFC","writeSpool",data)
+                    .done(function(response){
                     })
             }
             if (command == "eraseSpool"){
                 data={};
-                OctoPrint.simpleApiCommand("FilamentNFC", "eraseSpool", data)
-                    .done(function(response) {
+                OctoPrint.simpleApiCommand("FilamentNFC","eraseSpool",data)
+                    .done(function(response){
                     })
             }
             if (command == "stopTimer"){
                 data={};
-                OctoPrint.simpleApiCommand("FilamentNFC", "stopTimer", data)
-                    .done(function(response) {
+                OctoPrint.simpleApiCommand("FilamentNFC","stopTimer",data)
+                    .done(function(response){
                     })
             }
             if (command == "startTimer"){
                 data={};
-                OctoPrint.simpleApiCommand("FilamentNFC", "startTimer", data)
-                    .done(function(response) {
+                OctoPrint.simpleApiCommand("FilamentNFC","startTimer",data)
+                    .done(function(response){
                     })
             }
             if (command == "setSpoolDefine"){
                 data={};
-                OctoPrint.simpleApiCommand("FilamentNFC", "setSpoolDefine", data)
-                    .done(function(response) {
+                OctoPrint.simpleApiCommand("FilamentNFC","setSpoolDefine",data)
+                    .done(function(response){
                     })
             }
         };
 
-        self.sendReadSpool = function(data) {
+        self.sendReadSpool = function(data){
             OctoPrint.simpleApiGet("FilamentNFC")
-                .done(function(response) {
-                    self.status("Online");
+                .done(function(response){
                     uid(response.uid);
                     material(materialList[response.material]);
                     color(colorList[response.color]);

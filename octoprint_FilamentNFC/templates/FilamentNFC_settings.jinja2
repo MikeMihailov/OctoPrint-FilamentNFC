@@ -3,8 +3,8 @@
         <legend>
             <span style="white-space: pre-wrap;">Common settings</span>
         </legend>
-        <div class="control-group" title="Currency">
-            <label class="control-label" for="settings-currency">Currency</label>
+        <div class="control-group" title="Currency simbol">
+            <label class="control-label" for="settings-currency">Currency simbol</label>
             <div class="controls">
                 <input type="text" class="input-append" style="text-align:left" data-bind="value: settings.plugins.FilamentNFC.currency">
             </div>
@@ -25,20 +25,20 @@
         <button data-bind="click: writeSpoolSettings" class="btn icon-upload-alt" aria-hidden="true">&nbsp;{{ _('Write') }}</button>
         <button data-bind="click: eraseSpoolSettings" class="btn icon-eraser" aria-hidden="true">&nbsp;{{ _('Erase') }}</button>
         <button data-bind="click: setDefineSettings" class="btn icon-undo" aria-hidden="true">&nbsp;{{ _('Define') }}</button>
-        <button data-bind="click: stopTimer" class="btn icon-stop" aria-hidden="true">&nbsp;{{ _('Stop timer') }}</button>
-        <button data-bind="click: startTimer" class="btn icon-play" aria-hidden="true">&nbsp;{{ _('Start timer') }}</button>
+        <button data-bind="click: stopTimer" class="btn icon-stop" aria-hidden="true">&nbsp;{{ _('Stop scanning') }}</button>
+        <button data-bind="click: startTimer" class="btn icon-play" aria-hidden="true">&nbsp;{{ _('Start scanning') }}</button>
     </div>
     <br>
     <br>
     <div class="control-group" title="Status">
         <span>Timer:</span>
-        <span style="color:green">On</span>
+        <span style="color:green" data-bind="text: statusTimer">On</span>
         
         <span>RC522:</span>
-        <span style="color:green">Offline</span>
+        <span style="color:green" data-bind="text: statusRC522">Offline</span>
         
         <span>Tag:</span>
-        <span style="color:green">No tag</span>
+        <span style="color:green" data-bind="text: statusTag">No tag</span>
     </div>
     <div class="control-group" title="UID">
         <label class="control-label" for="uidInput">UID:</label>
