@@ -7,16 +7,15 @@ https://github.com/niccokunzmann/crc8
 
 ## Wiring
 
-Connect RC522-Raspberry Pi:
-
-SDA  -> pin 24
-SCK  -> pin 23
-MOSI -> pin 19
-MISO -> pin 21
-RQ   -> UNUSED
-GND  -> pin 6
-RST  -> pin 22
-3.3V -> pin 1
+Connect RC522-Raspberry Pi:    
+SDA  -> pin 24    
+SCK  -> pin 23    
+MOSI -> pin 19    
+MISO -> pin 21    
+RQ   -> UNUSED    
+GND  -> pin 6    
+RST  -> pin 22    
+3.3V -> pin 1    
 
 ## Setup
 
