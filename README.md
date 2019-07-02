@@ -3,7 +3,6 @@
 ## Use: 
 
 https://github.com/mxgxw/MFRC522-python.git
-https://github.com/lthiery/SPI-Py.git
 https://github.com/niccokunzmann/crc8
 
 ## Wiring
@@ -22,21 +21,15 @@ RST  -> pin 22
 ## Setup
 
 1. Init SPI:
-	sudo raspi-config
-	Inteface option -> SPI ->  <Yes>
-2. Install python:
-	sudo apt-get install python2.7-dev
-	sudo apt-get install python-pip
-3. Install library:	
-	pip install RPi.GPIO
-	mkdir SPI-py
-	cd SPI-py
-	git clone https://github.com/lthiery/SPI-Py.git
-	cd SPI-Py
-	sudo python setup.py install
-4. Install plugin:
-	Install via the bundled [Plugin Manager](https://github.com/foosel/OctoPrint/wiki/Plugin:-Plugin-Manager)
-	or manually using this URL:
+    sudo raspi-config^
+    Inteface option -> SPI ->  <Yes>
+2. Install library:    
+    source ~/oprint/bin/activate
+    pip install RPi.GPIO
+    pip install spidev
+3. Install plugin:
+    Install via the bundled [Plugin Manager](https://github.com/foosel/OctoPrint/wiki/Plugin:-Plugin-Manager)
+    or manually using this URL:
     https://github.com/photo-mickey/OctoPrint-Filamentnfc/archive/master.zip
 
 ## Configuration
