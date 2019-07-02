@@ -21,12 +21,12 @@ RST  -> pin 22
 ## Setup
 
 1. Init SPI:
-    sudo raspi-config^
-    Inteface option -> SPI ->  <Yes>
+    sudo raspi-config:
+    Inteface option -> SPI ->  Yes
 2. Install library:    
-    source ~/oprint/bin/activate
-    pip install RPi.GPIO
-    pip install spidev
+    source ~/oprint/bin/activate    
+    pip install RPi.GPIO    
+    pip install spidev    
 3. Install plugin:
     Install via the bundled [Plugin Manager](https://github.com/foosel/OctoPrint/wiki/Plugin:-Plugin-Manager)
     or manually using this URL:
