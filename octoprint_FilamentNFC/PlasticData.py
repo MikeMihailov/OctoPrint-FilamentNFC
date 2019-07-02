@@ -92,3 +92,18 @@ class spool:
         self.extMaxTemp = 0
         self.bedMinTemp = 0
         self.bedMaxTemp = 0
+
+    def define(self):
+        self.uid        = 0
+        self.material   = 1
+        self.color      = 1
+        self.weight     = 1000
+        self.balance    = self.weight
+        self.diametr    = 175
+        self.price      = 1200
+        self.vender     = 'BestFilament'
+        self.density    = 105
+        self.extMinTemp = 220
+        self.extMaxTemp = 270
+        self.bedMinTemp = 90
+        self.bedMaxTemp = 110

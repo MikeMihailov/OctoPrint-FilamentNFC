@@ -7,7 +7,6 @@
 $(function() {
     function FilamentnfcViewModel(parameters) {
         var self = this;
-        
         currencyList = ["\u20BD",
                         "\u20B4",
                         "\u043B",
@@ -73,22 +72,24 @@ $(function() {
                     'natural'
                    ]
         //*******************************PARAM*******************************
-        self.material     = ko.observable();
-        self.status       = ko.observable();
-        self.uid          = ko.observable();
-        self.color        = ko.observable();
-        self.weight       = ko.observable();
-        self.balance      = ko.observable();
-        self.diametr      = ko.observable();
-        self.price        = ko.observable();
-        self.vender       = ko.observable();
-        self.density      = ko.observable();
-        self.extMinTemp   = ko.observable();
-        self.extMaxTemp   = ko.observable();
-        self.bedMinTemp   = ko.observable();
-        self.bedMaxTemp   = ko.observable();
-        self.currency     = ko.observable();
-        self.currencyN    = ko.observable();
+        self.status  = ko.observable();
+        material     = ko.observable();
+        uid          = ko.observable();
+        color        = ko.observable();
+        weight       = ko.observable();
+        balance      = ko.observable();
+        diametr      = ko.observable();
+        price        = ko.observable();
+        vender       = ko.observable();
+        density      = ko.observable();
+        extMinTemp   = ko.observable();
+        extMaxTemp   = ko.observable();
+        bedMinTemp   = ko.observable();
+        bedMaxTemp   = ko.observable();
+        currency     = ko.observable();
+        materialOptions   = ko.observableArray([]);
+        colorOptions      = ko.observableArray([]);
+        currencySel       = ko.observable();
         self.LoginStateViewModel   = parameters[0];
         self.SettingsViewModel     = parameters[1];
         self.PrinterStateViewModel = parameters[2];
@@ -96,40 +97,40 @@ $(function() {
         self.settings = self.SettingsViewModel.settings;
         //*******************************************************************
         self.onAfterBinding = function() {
-            n = parameters[1].settings.plugins.FilamentNFC.currency()
-            self.currencyN(n);
-            self.currency(currencyList[n]);
-
-            self.systemMeas   = document.getElementById("settings-currency");
-            for(var i=0;i<currencyList.length;i++){
-                self.systemMeas.options[i] = new Option(currencyList[i],String(i));
-            }
-
+            currency(parameters[1].settings.plugins.FilamentNFC.currency());
             self.systemMeas   = document.getElementById("rw-material");
             for(var i=0;i<materialList.length;i++){
-                self.systemMeas.options[i] = new Option(materialList[i],String(i));
+                materialOptions.push(materialList[i]);
             }
-            
             self.systemMeas   = document.getElementById("rw-color");
             for(var i=0;i<colorList.length;i++){
-                self.systemMeas.options[i] = new Option(colorList[i],String(i));
+                colorOptions.push(colorList[i]);
             }
         }
         //*******************************************************************
-        /*
-        self.readSpool = function () {
+        readSpoolSettings = function(){
             self.sendReadSpool();
         }
-        
-        self.readSpoolSettings = function(){
+
+        writeSpoolSettings = function(){
+            self.sendWriteSpool("writeSpool");
         }
-        
-        self.writeSpoolSettings = function(){
+
+        eraseSpoolSettings = function(){
+            self.sendWriteSpool("eraseSpool");
         }
-        
-        self.eraseSpoolSettings = function(){
+
+        setDefineSettings = function(){
+            self.sendWriteSpool("setSpoolDefine");
         }
-        */
+
+        stopTimer = function(){
+            self.sendWriteSpool("stopTimer");
+        }
+
+        startTimer = function(){
+            self.sendWriteSpool("startTimer");
+        }
         //*******************************************************************
         //********************************API********************************
         //*******************************************************************
@@ -149,29 +150,88 @@ $(function() {
                 self.sendReadSpool();
             }
         }
-        
+
+        self.sendWriteSpool = function(command) {
+            if (command == "writeSpool"){
+                bufWeight = 0;
+                for(var i=0;i<materialList.length;i++){
+                    if(material() == materialList[i]){
+                        bufMaterial = i;
+                    }
+                }
+                bufColor = 0;
+                for(var i=0;i<colorList.length;i++){
+                    if(color() == colorList[i]){
+                        bufColor = i;
+                    }
+                }
+                data = {"color"      : bufColor,
+                        "material"   : bufMaterial,
+                        "weight"     : weight(),
+                        "balance"    : balance(),
+                        "diametr"    : diametr()*100,
+                        "price"      : price(),
+                        "vender"     : vender(),
+                        "density"    : density()*100,
+                        "extMinTemp" : extMinTemp(),
+                        "extMaxTemp" : extMaxTemp(),
+                        "bedMinTemp" : bedMinTemp(),
+                        "bedMaxTemp" : bedMaxTemp()
+                       };
+                console.log(data);
+                OctoPrint.simpleApiCommand("FilamentNFC", "writeSpool", data)
+                    .done(function(response) {
+                    })
+            }
+            if (command == "eraseSpool"){
+                data={};
+                OctoPrint.simpleApiCommand("FilamentNFC", "eraseSpool", data)
+                    .done(function(response) {
+                    })
+            }
+            if (command == "stopTimer"){
+                data={};
+                OctoPrint.simpleApiCommand("FilamentNFC", "stopTimer", data)
+                    .done(function(response) {
+                    })
+            }
+            if (command == "startTimer"){
+                data={};
+                OctoPrint.simpleApiCommand("FilamentNFC", "startTimer", data)
+                    .done(function(response) {
+                    })
+            }
+            if (command == "setSpoolDefine"){
+                data={};
+                OctoPrint.simpleApiCommand("FilamentNFC", "setSpoolDefine", data)
+                    .done(function(response) {
+                    })
+            }
+        };
+
         self.sendReadSpool = function(data) {
             OctoPrint.simpleApiGet("FilamentNFC")
                 .done(function(response) {
                     self.status("Online");
-                    self.uid(response.uid);
-                    self.material(response.material);
-                    self.color(response.color);
-                    self.weight(response.weight);
-                    self.balance(response.balance);
-                    self.diametr(response.diametr/100);
-                    self.price(response.price);
-                    self.vender(response.vender);
-                    self.density(response.density/100);
-                    self.extMinTemp(response.extMinTemp);
-                    self.extMaxTemp(response.extMaxTemp);
-                    self.bedMinTemp(response.bedMinTemp);
-                    self.bedMaxTemp(response.bedMaxTemp);
+                    uid(response.uid);
+                    material(materialList[response.material]);
+                    color(colorList[response.color]);
+                    weight(response.weight);
+                    balance(response.balance);
+                    diametr(response.diametr/100);
+                    price(response.price);
+                    vender(response.vender);
+                    density(response.density/100);
+                    extMinTemp(response.extMinTemp);
+                    extMaxTemp(response.extMaxTemp);
+                    bedMinTemp(response.bedMinTemp);
+                    bedMaxTemp(response.bedMaxTemp);
                 })
         };
     }
-
-
+//*******************************************************************
+//*******************************************************************
+//*******************************************************************
     OCTOPRINT_VIEWMODELS.push({
         construct: FilamentnfcViewModel,
         dependencies: ["loginStateViewModel","settingsViewModel","printerStateViewModel"],

@@ -11,7 +11,6 @@ from octoprint.util import RepeatedTimer
 import json
 import flask
 import logging
-
 from .NFC_Comm import *
 from .PlasticData import spool,material,colorStr
 import RPi.GPIO as GPIO
@@ -21,19 +20,13 @@ class FilamentnfcPlugin(octoprint.plugin.StartupPlugin,
                         octoprint.plugin.AssetPlugin,
                         octoprint.plugin.SimpleApiPlugin,
                         octoprint.plugin.SettingsPlugin):
-    interval = 3.0
+
     ##~~ SettingsPlugin mixin
     def get_settings_defaults(self):
         return dict(
-                currency=5,
+                currency='\u20BD',
                 scanPeriod=3.0
         )
-
-    #def get_template_vars(self):
-        #return dict(
-                #currency=self._settings.get(["currency"]),
-                #scanPeriod=self._settings.get(["scanPeriod"])
-        #)
 
     def get_template_configs(self):
         return [
@@ -61,10 +54,14 @@ class FilamentnfcPlugin(octoprint.plugin.StartupPlugin,
 
     def restartTimer(self,interval):
         if self.timer:
+            self.stopTimer()
+            self.startTimer(interval)
+
+    def stopTimer(self):
+        if self.timer:
             self._logger.info(">>Stopping Timer...")
             self.timer.cancel()
             self.timer = None
-            self.startTimer(interval)
 
     def startTimer(self,interval):
         self._logger.info(">>Starting Timer...")
@@ -72,7 +69,6 @@ class FilamentnfcPlugin(octoprint.plugin.StartupPlugin,
         self.timer.start()
 
     def updateData(self):
-        self._logger.info(">>Timer!")
         if self.nfc.tag.status==1:
             res=self.nfc.readSpool()
             if res==1:
@@ -82,21 +78,35 @@ class FilamentnfcPlugin(octoprint.plugin.StartupPlugin,
                 self.nfc.spool.clean()
         else:
             self._plugin_manager.send_plugin_message(self._identifier,1)
-            
-    
 
     ##~~ SimpleApiPlugin mixin
     def get_api_commands(self):
         return dict(
-                    readSpool=["uid"]
+                    writeSpool=["material",
+                                "color",
+                                "weight",
+                                "balance",
+                                "diametr",
+                                "price",
+                                "vender",
+                                "density",
+                                "extMinTemp",
+                                "extMaxTemp",
+                                "bedMinTemp",
+                                "bedMaxTemp"
+                               ],
+                    eraseSpool=[],
+                    stopTimer =[],
+                    startTimer=[],
+                    setSpoolDefine=[]
         )
 
     def on_api_get(self, request):
         vender = self.nfc.spool.vender.replace('\x00','')
         list = {
                 "uid"        : self.nfc.spool.uid,
-                "material"   : material[self.nfc.spool.material],
-                "color"      : colorStr[self.nfc.spool.color],
+                "material"   : self.nfc.spool.material,
+                "color"      : self.nfc.spool.color,
                 "weight"     : self.nfc.spool.weight,
                 "balance"    : self.nfc.spool.balance,
                 "diametr"    : self.nfc.spool.diametr,
@@ -111,10 +121,42 @@ class FilamentnfcPlugin(octoprint.plugin.StartupPlugin,
         return json.dumps(list)
 
     def on_api_command(self, command, data):
-        if command == 'readSpool':
+        self._logger.info(">>Got command:")
+        self._logger.info(command)
+        if command == 'writeSpool':
+            self.nfc.spool.material   = int(data["material"])
+            self.nfc.spool.color      = int(data["color"])
+            self.nfc.spool.weight     = int(data["weight"])
+            self.nfc.spool.balance    = int(data["balance"])
+            self.nfc.spool.diametr    = int(data["diametr"])
+            self.nfc.spool.price      = int(data["price"])
+            self.nfc.spool.vender     = data["vender"]
+            self.nfc.spool.density    = int(data["density"])
+            self.nfc.spool.extMinTemp = int(data["extMinTemp"])
+            self.nfc.spool.extMaxTemp = int(data["extMaxTemp"])
+            self.nfc.spool.bedMinTemp = int(data["bedMinTemp"])
+            self.nfc.spool.bedMaxTemp = int(data["bedMaxTemp"])
+            self.stopTimer()
+            self.nfc.writeSpool()
             self.nfc.readSpool()
-            parameter = self.nfc.spool.uid;
-            self._plugin_manager.send_plugin_message(self._identifier, self.nfc.spool.vender)
+            self.startTimer()
+        if command == 'eraseSpool':
+            self.nfc.spool.clean()
+            self.stopTimer()
+            self.nfc.writeSpool()
+            self.nfc.readSpool()
+            self.startTimer()
+        if command == 'stopTimer':
+            self.stopTimer()
+        if command == 'startTimer':
+            self.startTimer(self.scanPeriod)
+        if command == 'setSpoolDefine':
+            self._logger.info(">>Got define command")
+            self.nfc.spool.define()
+            self.stopTimer()
+            self.nfc.writeSpool()
+            self.nfc.readSpool()
+            self.startTimer()
 
     ##~~ AssetPlugin mixin
     def get_assets(self):
