@@ -120,7 +120,7 @@ class FilamentnfcPlugin(octoprint.plugin.StartupPlugin,
         }
         return json.dumps(list)
 
-    def on_api_command(self, command, data):
+    def on_api_command(self,command,data):
         self._logger.info(">>Got command:")
         self._logger.info(command)
         if command == 'writeSpool':
@@ -139,13 +139,13 @@ class FilamentnfcPlugin(octoprint.plugin.StartupPlugin,
             self.stopTimer()
             self.nfc.writeSpool()
             self.nfc.readSpool()
-            self.startTimer()
+            self.startTimer(self.scanPeriod)
         if command == 'eraseSpool':
             self.nfc.spool.clean()
             self.stopTimer()
             self.nfc.writeSpool()
             self.nfc.readSpool()
-            self.startTimer()
+            self.startTimer(self.scanPeriod)
         if command == 'stopTimer':
             self.stopTimer()
         if command == 'startTimer':
@@ -156,7 +156,7 @@ class FilamentnfcPlugin(octoprint.plugin.StartupPlugin,
             self.stopTimer()
             self.nfc.writeSpool()
             self.nfc.readSpool()
-            self.startTimer()
+            self.startTimer(self.scanPeriod)
 
     ##~~ AssetPlugin mixin
     def get_assets(self):
