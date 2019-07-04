@@ -1,5 +1,26 @@
 # OctoPrint-Filamentnfc
 
+Octoprint plugin that scan nfc tag on the spool via RC522. You can storage the information about the filament, that:
+
+1. Material type    
+2. Color    
+3. Weight    
+4. Current weight balance    
+5. Diametr of filament    
+6. Price    
+7. Vender name    
+8. Plastic density    
+9. Extruder minimum temperature    
+10. Extruder maximum temperature    
+11. Hotbed minimum temperature    
+12. Hotbed maximum temperature    
+
+In common mode plugin try to scan tag every 3 seconds (You can change this interval in settings). When tag is found, plugin will read data from tag. After that you can see filament data on the siderbar and in settings. Data will be frozen for next reading.    
+![Side bar](/Screensgot/FirstScreen.png)
+Plugn support Mifare Classic 1K and Mifare Ultralight tags.    
+
+
+
 ## Use: 
 
 https://github.com/mxgxw/MFRC522-python.git    
