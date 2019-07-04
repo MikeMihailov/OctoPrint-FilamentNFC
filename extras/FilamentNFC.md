@@ -3,16 +3,16 @@ layout: plugin
 
 id: FilamentNFC
 title: OctoPrint-Filamentnfc
-description: TODO
-author: photo-mickey
+description: Plugin for scanning spool nfc tag via RC522
+author: Mike Mihailov
 license: AGPLv3
 
 # TODO
 date: today's date in format YYYY-MM-DD, e.g. 2015-04-21
 
-homepage: https://github.com/photo-mickey/OctoPrint-Filamentnfc
-source: https://github.com/photo-mickey/OctoPrint-Filamentnfc
-archive: https://github.com/photo-mickey/OctoPrint-Filamentnfc/archive/master.zip
+homepage: https://github.com/MikeMihailov/OctoPrint-Filamentnfc
+source: https://github.com/MikeMihailov/OctoPrint-Filamentnfc
+archive: https://github.com/MikeMihailov/OctoPrint-Filamentnfc/archive/master.zip
 
 # TODO
 # Set this to true if your plugin uses the dependency_links setup parameter to include
