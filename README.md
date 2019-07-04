@@ -16,15 +16,16 @@ Octoprint plugin that scan nfc tag on the spool via RC522. You can storage the i
 12. Hotbed maximum temperature    
 
 In common mode plugin try to scan tag every 3 seconds (You can change this interval in settings). When tag is found, plugin will read data from tag. After that you can see filament data on the siderbar and in settings. Data will be frozen for next reading.    
-![Side bar](/Screensgot/FirstScreen.png)
+![Side bar](/screenshot/FirstScreen.png)
 Plugn support Mifare Classic 1K and Mifare Ultralight tags.    
+You can write filament data into nfc tag in settigs:
+![Side bar](/screenshot/SettingsScreen.png)
 
+## Mounting
 
+If spool holder locate on the priner side (like Ultimaker), you can drill holls and mount RC522 on it. There is drill layout for RC522 in "drillLayout" directory. Just print picture and use drill Ø3 mm. Use column to setup gap between RC522 and spool.
 
-## Use: 
-
-https://github.com/mxgxw/MFRC522-python.git    
-https://github.com/niccokunzmann/crc8    
+![Side bar](/drillLayout/Drill layout.png)
 
 ## Wiring
 
@@ -41,20 +42,19 @@ RST  -> pin 22
 ## Setup
 
 1. Init SPI:    
-    sudo raspi-config:    
-    Inteface option -> SPI ->  Yes    
-2. Install library:    
-    source ~/oprint/bin/activate    
-    pip install RPi.GPIO    
-    pip install spidev    
-3. Install plugin:    
-    Install via the bundled [Plugin Manager](https://github.com/foosel/OctoPrint/wiki/Plugin:-Plugin-Manager)
-    or manually using this URL:
+    sudo raspi-config:
+    Inteface option -> SPI -> <Yes>
+2. Install library via SSH:
+    $ source ~/oprint/bin/activate    
+    $ pip install RPi.GPIO    
+    $ pip install spidev    
+3. Install plugin:
+    Install manually using this URL:
     https://github.com/photo-mickey/OctoPrint-Filamentnfc/archive/master.zip
 
 ## Configuration
 
-1. If you cant see the FilamentNFC tab on the sidebar, please open the log and 'Setup' section of Readme    
+1. If you cant see the FilamentNFC tab on the sidebar, please open the log and go to 'Setup' section of Readme    
 2. If you see in the FilamentNFC tab "Status: RC522 communication ERROR!", please check connection in 'Wiring' section of Readme    
 3. If you see in the FilamentNFC tab "Status: Online" - go next    
 2. Put the nfc tag on your spool and install it in to the printer    
@@ -65,3 +65,9 @@ RST  -> pin 22
 7. Put filament data in to the filds    
 8. Press "Write"    
 9. Press "Start scanning"    
+
+
+## Used extra libraries: 
+
+https://github.com/mxgxw/MFRC522-python.git    
+https://github.com/niccokunzmann/crc8    
