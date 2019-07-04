@@ -25,7 +25,7 @@ You can write filament data into nfc tag in settigs:
 
 If spool holder locate on the priner side (like Ultimaker), you can drill holls and mount RC522 on it. There is drill layout for RC522 in "drillLayout" directory. Just print picture and use drill Ø3 mm. Use column to setup gap between RC522 and spool.
 
-![Drill layout](/drillLayout/Drill layout.png)
+![Drill layout](/drillLayout/Drill_layout.png)
 
 ## Wiring
 
