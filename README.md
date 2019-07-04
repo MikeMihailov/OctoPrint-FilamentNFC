@@ -16,10 +16,10 @@ Octoprint plugin that scan nfc tag on the spool via RC522. You can storage the i
 12. Hotbed maximum temperature    
 
 In common mode plugin try to scan tag every 3 seconds (You can change this interval in settings). When tag is found, plugin will read data from tag. After that you can see filament data on the siderbar and in settings. Data will be frozen for next reading.    
-![Side bar](/screenshot/FirstScreen.png)
+![Side bar](/Screenshot/FirstScreen.png)
 Plugn support Mifare Classic 1K and Mifare Ultralight tags.    
 You can write filament data into nfc tag in settigs:
-![Settings](/screenshot/SettingsScreen.png)
+![Settings](/Screenshot/SettingsScreen.png)
 
 ## Mounting
 
