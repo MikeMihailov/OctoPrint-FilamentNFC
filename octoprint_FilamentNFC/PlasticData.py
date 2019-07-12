@@ -69,7 +69,7 @@ class spool:
     color      = 1              # White as default (..)
     weight     = 1000           # gr (1kg as default)
     balance    = weight         # gr (100% as default)
-    diametr    = 175            # mm*10^-2
+    diameter   = 175            # mm*10^-2
     price      = 1200           # in rus rub as default (The most popular currency in the world ofcourse)
     vender     = 'BestFilament' # text line of 16 char max
     density    = 105            # gr/cm^3 *10^-2
@@ -84,7 +84,7 @@ class spool:
         self.color      = 0
         self.weight     = 0
         self.balance    = 0
-        self.diametr    = 0
+        self.diameter   = 0
         self.price      = 0
         self.density    = 0
         self.vender     = ''
@@ -99,7 +99,7 @@ class spool:
         self.color      = 1
         self.weight     = 1000
         self.balance    = self.weight
-        self.diametr    = 175
+        self.diameter   = 175
         self.price      = 1200
         self.vender     = 'BestFilament'
         self.density    = 105

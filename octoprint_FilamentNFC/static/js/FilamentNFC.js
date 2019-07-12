@@ -77,7 +77,7 @@ $(function() {
         color        = ko.observable();
         weight       = ko.observable();
         balance      = ko.observable();
-        diametr      = ko.observable();
+        diameter     = ko.observable();
         price        = ko.observable();
         vender       = ko.observable();
         density      = ko.observable();
@@ -110,6 +110,7 @@ $(function() {
             for(var i=0;i<colorList.length;i++){
                 colorOptions.push(colorList[i]);
             }
+            self.sendReadSpool();
         }
         //*******************************************************************
         readSpoolSettings = function(){
@@ -176,7 +177,7 @@ $(function() {
                         "material"   : bufMaterial,
                         "weight"     : weight(),
                         "balance"    : balance(),
-                        "diametr"    : diametr()*100,
+                        "diameter"    : diameter()*100,
                         "price"      : price(),
                         "vender"     : vender(),
                         "density"    : density()*100,
@@ -224,7 +225,7 @@ $(function() {
                     color(colorList[response.color]);
                     weight(response.weight);
                     balance(response.balance);
-                    diametr(response.diametr/100);
+                    diameter(response.diameter/100);
                     price(response.price);
                     vender(response.vender);
                     density(response.density/100);

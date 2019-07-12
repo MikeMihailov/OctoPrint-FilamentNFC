@@ -29,7 +29,7 @@ keyA = [0xFF,0xFF,0xFF,0xFF,0xFF,0xFF]
 #********************MEMORY MAP MIFARE CLASSIC**********************************
 #*******************************************************************************
 #   |--15----14--|--13----12--|-11---10-|-9-----8-|--7----6--|--5----4--|--3----2--|--1----0--|
-# 4 |  RESERVED  |   density  |  price  | diametr |  balance |  weight  |   color  | material |
+# 4 |  RESERVED  |   density  |  price  | diameter |  balance |  weight  |   color  | material |
 # 5 |                                 V E N D O R     N A M E                                 |
 # 6 | CRC8 |       R E S E R V E D                |bedMaxTemp|bedMinTemp|extMaxTemp|extMinTemp|
 #*******************************************************************************
@@ -38,7 +38,7 @@ materialAdr   = 0   # 2 bytes
 colorAdr      = 2   # 2 bytes
 weightAdr     = 4   # 2 bytes
 balanceAdr    = 6   # 2 bytes
-diametrAdr    = 8   # 2 bytes
+diameterAdr   = 8   # 2 bytes
 priceAdr      = 10  # 2 bytes
 densityAdr    = 12  # 2 bytes
 # block 5
@@ -56,7 +56,7 @@ heshAdr       = 15  # 1 byte
 #    |--3----2--|--1----0--|
 #  4 |   color  | material |
 #  5 |  balance |  weight  |
-#  6 |  price   | diametr  |
+#  6 |  price   | diameter  |
 #  7 | RESERVED |  density |
 #  8 |    VENDOR NAME 0    |
 #  9 |    VENDOR NAME 1    |
@@ -136,10 +136,10 @@ class NFCmodule:
         return 1
 #******************************************************************************************
     def gr2mm(self,gr):
-        return gr/(self.spool.density * (math.pi*(self.spool.diametr/2)**2) * 0,001)
+        return gr/(self.spool.density * (math.pi*(self.spool.diameter/2)**2) * 0,001)
 #******************************************************************************************
     def mm2gr(self,mm):
-        return self.spool.density * (math.pi*(self.spool.diametr/2)**2) * mm * 0,001
+        return self.spool.density * (math.pi*(self.spool.diameter/2)**2) * mm * 0,001
 #******************************************************************************************
     def gr2mony(self,gr):
         return gr*self.spool.price/self.spool.weight
@@ -205,7 +205,7 @@ class NFCmodule:
         #***********BLOCK 6***********
         data = self.tag.MFRC522_Read(curBlock)
         if len(data) == 16:
-            self.spool.diametr  = data[0] | data[1]<<8
+            self.spool.diameter  = data[0] | data[1]<<8
             self.spool.price    = data[2] | data[3]<<8
             i=0
             while i<4:
@@ -296,7 +296,7 @@ class NFCmodule:
             print "color      = " + colorStr[self.spool.color]
             print "weight     = " + str(self.spool.weight) + " gr"
             print "balance    = " + str(self.spool.balance) + " gr"
-            print "diametr    = " + str(self.spool.diametr*0.01) + " mm"
+            print "diameter    = " + str(self.spool.diameter*0.01) + " mm"
             print "price      = " + str(self.spool.price) + " rub"
             print "vender     = " + str(self.spool.vender)
             print "density    = " + str(self.spool.density*0.01) + " gr/cm^3"
@@ -319,7 +319,7 @@ class NFCmodule:
             self.spool.color    = data[colorAdr]    | data[colorAdr+1]<<8
             self.spool.weight   = data[weightAdr]   | data[weightAdr+1]<<8
             self.spool.balance  = data[balanceAdr]  | data[balanceAdr+1]<<8
-            self.spool.diametr  = data[diametrAdr]  | data[diametrAdr+1]<<8
+            self.spool.diameter  = data[diameterAdr]  | data[diameterAdr+1]<<8
             self.spool.price    = data[priceAdr]    | data[priceAdr+1]<<8
             self.spool.density  = data[densityAdr]  | data[densityAdr+1]<<8
             for i in range(0,16):
@@ -375,7 +375,7 @@ class NFCmodule:
             print "color      = " + colorStr[self.spool.color]
             print "weight     = " + str(self.spool.weight) + " gr"
             print "balance    = " + str(self.spool.balance) + " gr"
-            print "diametr    = " + str(self.spool.diametr*0.01) + " mm"
+            print "diameter    = " + str(self.spool.diameter*0.01) + " mm"
             print "price      = " + str(self.spool.price) + " rub"
             print "vender     = " + str(self.spool.vender)
             print "density    = " + str(self.spool.density*0.01) + " gr/cm^3"
@@ -435,8 +435,8 @@ class NFCmodule:
         outData = []
         for i in range(0,16):
             outData.append(0x00)
-        outData[0] = self.spool.diametr      & 0xFF
-        outData[1] = (self.spool.diametr>>8) & 0xFF
+        outData[0] = self.spool.diameter      & 0xFF
+        outData[1] = (self.spool.diameter>>8) & 0xFF
         outData[2] = self.spool.price        & 0xFF
         outData[3] = (self.spool.price>>8)   & 0xFF
         for i in range (0,4):
@@ -531,8 +531,8 @@ class NFCmodule:
         outData[weightAdr+1]   = (self.spool.weight>>8)   & 0xFF
         outData[balanceAdr]    = self.spool.balance       & 0xFF
         outData[balanceAdr+1]  = (self.spool.balance>>8)  & 0xFF
-        outData[diametrAdr]    = self.spool.diametr       & 0xFF
-        outData[diametrAdr+1]  = (self.spool.diametr>>8)  & 0xFF
+        outData[diameterAdr]    = self.spool.diameter       & 0xFF
+        outData[diameterAdr+1]  = (self.spool.diameter>>8)  & 0xFF
         outData[priceAdr]      = self.spool.price         & 0xFF
         outData[priceAdr+1]    = (self.spool.price>>8)    & 0xFF
         outData[densityAdr]    = self.spool.density       & 0xFF

@@ -26,7 +26,7 @@ class FilamentnfcPlugin(octoprint.plugin.StartupPlugin,
         return dict(
                 currency='\u20BD',
                 scanPeriod=3.0
-        )
+               )
 
     def get_template_configs(self):
         return [
@@ -46,6 +46,7 @@ class FilamentnfcPlugin(octoprint.plugin.StartupPlugin,
         GPIO.setwarnings(False)
         GPIO.cleanup()
         self.nfc=NFCmodule()
+        self.nfc.spool.clean()
         if self.nfc.tag.status==0:
             self._logger.info(">>RC522 communication ERROR!")
         self.nfc.info=0
@@ -72,12 +73,12 @@ class FilamentnfcPlugin(octoprint.plugin.StartupPlugin,
         if self.nfc.tag.status==1:
             res=self.nfc.readSpool()
             if res==1:
-                self._plugin_manager.send_plugin_message(self._identifier,3)
+                self._plugin_manager.send_plugin_message(self._identifier,3)    #New nfc data from RC522
             if res==0:
-                self._plugin_manager.send_plugin_message(self._identifier,2)
-                self.nfc.spool.clean()
+                self._plugin_manager.send_plugin_message(self._identifier,2)    #No nfc data from RC522
+                #self.nfc.spool.clean()
         else:
-            self._plugin_manager.send_plugin_message(self._identifier,1)
+            self._plugin_manager.send_plugin_message(self._identifier,1)        #RC522 communication ERROR!
 
     ##~~ SimpleApiPlugin mixin
     def get_api_commands(self):
@@ -86,7 +87,7 @@ class FilamentnfcPlugin(octoprint.plugin.StartupPlugin,
                                 "color",
                                 "weight",
                                 "balance",
-                                "diametr",
+                                "diameter",
                                 "price",
                                 "vender",
                                 "density",
@@ -109,7 +110,7 @@ class FilamentnfcPlugin(octoprint.plugin.StartupPlugin,
                 "color"      : self.nfc.spool.color,
                 "weight"     : self.nfc.spool.weight,
                 "balance"    : self.nfc.spool.balance,
-                "diametr"    : self.nfc.spool.diametr,
+                "diameter"   : self.nfc.spool.diameter,
                 "price"      : self.nfc.spool.price,
                 "vender"     : vender,
                 "density"    : self.nfc.spool.density,
@@ -128,7 +129,7 @@ class FilamentnfcPlugin(octoprint.plugin.StartupPlugin,
             self.nfc.spool.color      = int(data["color"])
             self.nfc.spool.weight     = int(data["weight"])
             self.nfc.spool.balance    = int(data["balance"])
-            self.nfc.spool.diametr    = int(data["diametr"])
+            self.nfc.spool.diameter   = int(data["diameter"])
             self.nfc.spool.price      = int(data["price"])
             self.nfc.spool.vender     = data["vender"]
             self.nfc.spool.density    = int(data["density"])
@@ -162,8 +163,6 @@ class FilamentnfcPlugin(octoprint.plugin.StartupPlugin,
     def get_assets(self):
         return dict(
             js=["js/FilamentNFC.js"],
-            css=["css/FilamentNFC.css"],
-            less=["less/FilamentNFC.less"]
         )
 
     ##~~ Softwareupdate hook
