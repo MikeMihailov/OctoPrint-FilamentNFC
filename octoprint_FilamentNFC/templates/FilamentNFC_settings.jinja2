@@ -1,0 +1,130 @@
+<form id="NFCsettings" class="form-horizontal">
+    <fieldset>
+        <legend>
+            <span style="white-space: pre-wrap;">Common settings</span>
+        </legend>
+        <div class="control-group" title="Currency simbol">
+            <label class="control-label" for="settings-currency">Currency simbol</label>
+            <div class="controls">
+                <input type="text" class="input-append" style="text-align:left" data-bind="value: settings.plugins.FilamentNFC.currency">
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="settings-ScanPeriod">Set period of nfc scan</label>
+            <div class="controls">
+                <input type="number" class="input-append" style="text-align:left" data-bind="value: settings.plugins.FilamentNFC.scanPeriod">
+                <span class="add-on">sec</span>
+            </div>
+        </div>
+    </fieldset>
+    <legend>
+        <span style="white-space: pre-wrap;">Spool read/write</span>
+    </legend>
+    <div class="btn-group" role="group" aria-label="RW control">
+        <button data-bind="click: readSpoolSettings" class="btn icon-download-alt" aria-hidden="true">&nbsp;{{ _('Read') }}</button>
+        <button data-bind="click: writeSpoolSettings" class="btn icon-upload-alt" aria-hidden="true">&nbsp;{{ _('Write') }}</button>
+        <button data-bind="click: eraseSpoolSettings" class="btn icon-eraser" aria-hidden="true">&nbsp;{{ _('Erase') }}</button>
+        <button data-bind="click: setDefineSettings" class="btn icon-undo" aria-hidden="true">&nbsp;{{ _('Define') }}</button>
+        <button data-bind="click: stopTimer" class="btn icon-stop" aria-hidden="true">&nbsp;{{ _('Stop scanning') }}</button>
+        <button data-bind="click: startTimer" class="btn icon-play" aria-hidden="true">&nbsp;{{ _('Start scanning') }}</button>
+    </div>
+    <br>
+    <br>
+    <div class="control-group" title="Status">
+        <span>Scanning:</span>
+        <span style="color:green" data-bind="text: statusTimer">On</span>
+        
+        <span>RC522:</span>
+        <span style="color:green" data-bind="text: statusRC522">Offline</span>
+        
+        <span>Tag:</span>
+        <span style="color:green" data-bind="text: statusTag">No tag</span>
+    </div>
+    <div class="control-group" title="UID">
+        <label class="control-label" for="uidInput">UID:</label>
+        <div class="controls">
+            <input id="uidInput" type="number" class="input-append" style="text-align:left" data-bind="value: uid" disabled>
+        </div>
+    </div>
+    <div class="control-group" title="Material">
+        <label class="control-label" for="materialSelect">Material:</label>
+        <div class="controls">
+            <select id="materialSelect" style="text-align:left" data-bind="options: materialOptions, value: material"></select>
+        </div>
+    </div>
+    <div class="control-group" title="Color">
+        <label class="control-label" for="colorSelect">Color:</label>
+        <div class="controls">
+            <select id="colorSelect" style="text-align:left" data-bind="options: colorOptions, value: color"></select>
+        </div>
+    </div>
+    <div class="control-group" title="Weight">
+        <label class="control-label" for="weightInput">Weight:</label>
+        <div class="controls">
+            <input id="weightInput" type="number"class="input-append" style="text-align:left" data-bind="value: weight">
+            <span class="add-on">gr</span>
+        </div>
+    </div>
+    <div class="control-group" title="Balance">
+        <label class="control-label" for="balanceInput">Balance:</label>
+        <div class="controls">
+            <input id="balanceInput" type="number"class="input-append" style="text-align:left" data-bind="value: balance">
+            <span class="add-on">gr</span>
+        </div>
+    </div>
+    <div class="control-group" title="diameter">
+        <label class="control-label" for="diameterInput">diameter:</label>
+        <div class="controls">
+            <input id="diameterInput" type="number"step="0.1"class="input-append" style="text-align:left" data-bind="value: diameter">
+            <span class="add-on">mm</span>
+        </div>
+    </div>
+    <div class="control-group" title="Price">
+        <label class="control-label" for="priceInput">Price:</label>
+        <div class="controls">
+            <input id="priceInput" type="number"step="100"class="input-append" style="text-align:left" data-bind="value: price">
+            <span class="add-on"data-bind="text: currency"></span>
+        </div>
+    </div>
+    <div class="control-group" title="Vender">
+        <label class="control-label" for="vendrInput">Vender:</label>
+        <div class="controls">
+            <input id="vendrInput" type="text" class="input-append" style="text-align:left" data-bind="value: vender">
+        </div>
+    </div>
+    <div class="control-group" title="Density">
+        <label class="control-label" for="densityInput">Density:</label>
+        <div class="controls">
+            <input id="densityInput" type="number" class="input-append" style="text-align:left" data-bind="value: density">
+            <span class="add-on">gr/cm<sup>3</sup>*10<sup>-2</sup></span>
+        </div>
+    </div>
+    <div class="control-group" title="Extruder minimal temperatureก">
+        <label class="control-label" for="emintInput">Extruder minimal temperature:</label>
+        <div class="controls">
+            <input id="emintInput" type="number" step="10" class="input-append" style="text-align:left" data-bind="value: extMinTemp">
+            <span class="add-on"><sup>o</sup>C</span>
+        </div>
+    </div>
+    <div class="control-group" title="Extruder maximum temperature">
+        <label class="control-label" for="emaxtInput">Extruder maximum temperature <sup>o</sup>C:</label>
+        <div class="controls">
+            <input id="emaxtInput" type="number" step="10" class="input-append" style="text-align:left" data-bind="value: extMaxTemp">
+            <span class="add-on"><sup>o</sup>C</span>
+        </div>
+    </div>
+    <div class="control-group" title="Bed minimal temperature">
+        <label class="control-label" for="bmintInput">Bed minimal temperature <sup>o</sup>C:</label>
+        <div class="controls">
+            <input id="bmintInput" type="number" step="10" class="input-append" style="text-align:left" data-bind="value: bedMinTemp">
+            <span class="add-on"><sup>o</sup>C</span>
+        </div>
+    </div>
+    <div class="control-group" title="Bed maximum temperature">
+        <label class="control-label" for="bmaxttInput">Bed maximum temperature <sup>o</sup>C:</label>
+        <div class="controls">
+            <input id="bmaxttInput" type="number" step="10" class="input-append" style="text-align:left" data-bind="value: bedMaxTemp">
+            <span class="add-on"><sup>o</sup>C</span>
+        </div>
+    </div>
+</form>
