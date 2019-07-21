@@ -41,7 +41,7 @@ RST  -> pin 22
 
 1. Init SPI:    
     sudo raspi-config:
-    Interface option -> SPI -> <Yes>
+    Interface option -> SPI -> Yes
 2. Install library via SSH:
     $ source ~/oprint/bin/activate    
     $ pip install RPi.GPIO    
