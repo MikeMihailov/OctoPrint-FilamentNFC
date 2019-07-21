@@ -1,12 +1,12 @@
 # OctoPrint-Filamentnfc
 
-Octoprint plugin that scan nfc tag on the spool via RC522. You can storage the information about the filament, that:
+Octoprint plugin that scans nfc tag on the spool via RC522. You can storage the information about the filament, such as:
 
 1. Material type    
 2. Color    
 3. Weight    
 4. Current weight balance    
-5. Diameter  of filament    
+5. Diameter of filament    
 6. Price    
 7. Vender name    
 8. Plastic density    
@@ -15,15 +15,15 @@ Octoprint plugin that scan nfc tag on the spool via RC522. You can storage the i
 11. Hotbed minimum temperature    
 12. Hotbed maximum temperature    
 
-In common mode plugin try to scan tag every 3 seconds (You can change this interval in settings). When tag is found, plugin will read data from tag. After that you can see filament data on the siderbar and in settings. Data will be frozen for next reading.    
+In common mode plugin tries to scan tag every 3 seconds (You can change this interval in settings). When tag is found, plugin will read data from tag. After that you can see filament data on the siderbar and in settings. Data will be frozen until next reading.    
 ![Side bar](/Screenshot/FirstScreen.png)
 Plugin support Mifare Classic 1K and Mifare Ultralight tags.    
-You can write filament data into nfc tag in settigs:
+You can write filament data into nfc tag in settings:
 ![Settings](/Screenshot/SettingsScreen.png)
 
 ## Mounting
 
-If spool holder locate on the printer side (like Ultimaker), you can drill holes and mount RC522 on it. There is drill layout for RC522 in "drillLayout" directory. Just print picture and use drill Ø3 mm. Use column to setup gap between RC522 and spool.
+If spool holder is located on the printer side (like Ultimaker), you can drill holes and mount RC522 on it. There is a drill layout for RC522 in "drillLayout" directory. Just print picture and use drill Ø3 mm. Use the column to setup gap between RC522 and spool.    
 
 ## Wiring
 
@@ -52,13 +52,13 @@ RST  -> pin 22
 
 ## Configuration
 
-1. If you can't  see the FilamentNFC tab on the sidebar, please open the log and go to 'Setup' section of Readme    
+1. If you can't see the FilamentNFC tab on the sidebar, please open the log and go to 'Setup' section of Readme    
 2. If you see in the FilamentNFC tab "Status: RC522 communication ERROR!", please check connection in 'Wiring' section of Readme    
 3. If you see in the FilamentNFC tab "Status: Online" - go next    
-2. Put the nfc tag on your spool and install it in to the printer    
+2. Put the nfc tag on your spool and install it into the printer    
 3. Go FilamentNFC settings    
-4. Change your local currency symbol  (just copy/paste)    
-5. Turn the spool so that you combine the tag is facing the RC522 ("Tag: No tag" turn into "Tag detected")    
+4. Change your local currency symbol (just copy/paste)    
+5. Turn the spool so that you combine the tag facing the RC522 ("Tag: No tag" turn into "Tag detected")    
 6. Press "Stop scanning"    
 7. Put filament data in to the fields    
 8. Press "Write"    
