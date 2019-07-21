@@ -24,7 +24,7 @@ class FilamentnfcPlugin(octoprint.plugin.StartupPlugin,
     ##~~ SettingsPlugin mixin
     def get_settings_defaults(self):
         return dict(
-                currency='\u20BD',
+                currency='',
                 scanPeriod=3.0
                )
 
